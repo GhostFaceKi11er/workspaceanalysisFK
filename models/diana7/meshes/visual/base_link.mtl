@@ -1,0 +1,12 @@
+# Blender MTL File: 'diana7.blend'
+# Material Count: 1
+
+newmtl /agile_silverblue_01_without_bump
+Ns 254.901960
+Ka 1.000000 1.000000 1.000000
+Kd 0.600000 0.651000 0.682400
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2

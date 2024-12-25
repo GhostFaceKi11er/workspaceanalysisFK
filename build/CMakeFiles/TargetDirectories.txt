@@ -1,0 +1,3 @@
+/home/haitaoxu/fkws/build/CMakeFiles/fkws.dir
+/home/haitaoxu/fkws/build/CMakeFiles/edit_cache.dir
+/home/haitaoxu/fkws/build/CMakeFiles/rebuild_cache.dir
