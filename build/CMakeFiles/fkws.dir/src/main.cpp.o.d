@@ -1212,4 +1212,5 @@ CMakeFiles/fkws.dir/src/main.cpp.o: /home/haitaoxu/fkws/src/main.cpp \
  /usr/include/dart/gui/osg/render/SphereShapeNode.hpp \
  /usr/include/dart/gui/osg/render/VoxelGridShapeNode.hpp \
  /usr/include/dart/gui/osg/render/WarningShapeNode.hpp \
- /home/haitaoxu/fkws/src/SpaceSampler.h
+ /home/haitaoxu/fkws/src/SpaceSampler.h \
+ /usr/include/osgGA/TrackballManipulator

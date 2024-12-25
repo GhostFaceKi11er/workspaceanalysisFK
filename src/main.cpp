@@ -11,6 +11,7 @@
 #include <vector>
 #include <dart/gui/osg/osg.hpp>
 #include "SpaceSampler.h"
+#include <osgGA/TrackballManipulator>
 #include <chrono>
 //#include <octovis/octovis.h>
 // 修正类定义
@@ -130,7 +131,7 @@ Eigen::VectorXd getConfig(std::vector<int> revoluteJointIndex, dart::dynamics::S
 }
 
 bool FK(octomap::OcTree& tree, std::vector<Eigen::VectorXd>& randomsampleconfigs, dart::dynamics::SkeletonPtr m1, bool collisionFlag, 
-    bool jointTorqueFlag, double ratio, std::vector<int> revoluteJointIndex, int singlechaindofs, int revoluteJointCount, Eigen::VectorXd& config, int treeSize, bool& IKflag, std::vector<double>& samplebound){
+    bool jointTorqueFlag, double ratio, std::vector<int> revoluteJointIndex, int singlechaindofs, int revoluteJointCount, Eigen::VectorXd& config, int treeSize, bool& IKflag, std::vector<double>& samplebound, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits){
     //FK
     //std::vector<Eigen::VectorXd> sampledpositions;
     int batchPointCount = 0;
@@ -144,10 +145,12 @@ bool FK(octomap::OcTree& tree, std::vector<Eigen::VectorXd>& randomsampleconfigs
         auto rightEndEffector = m1->getBodyNode("rightHandEE");
         Eigen::VectorXd positions(3);
         //auto rh = rightEndEffector->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
-        positions = rightEndEffector->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World()).translation();
+        positions = rightEndEffector->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World()).translation(); // 只获取了右手末端执行器的位置，左手末端执行器的位置没有获取
         octomap::point3d point(positions[0], positions[1], positions[2]);
 
         if (point.x() > samplebound[0] && point.x() < samplebound[1] && point.y() > samplebound[2] && point.y() < samplebound[3] && point.z() > samplebound[4] && point.z() < samplebound[5]){ // 判断点是否在有效范围内
+            collisionFlag = checkCollision(m1, world);
+            jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
             octomap::OcTreeNode* node = tree.search(point);
             if (node != nullptr && !collisionFlag && !jointTorqueFlag){
                 //std::cout << "before node->getOccupancy(): " << node->getOccupancy() << std::endl;
@@ -155,8 +158,28 @@ bool FK(octomap::OcTree& tree, std::vector<Eigen::VectorXd>& randomsampleconfigs
                 tree.updateNode(point, true);
                 node->setValue(1.0);
                 batchNewvisitPointCount++;
+                /*std::cout << point.x() << " " << point.y() << " " << point.z() << std::endl;
+                // 对称点, 对称点在y轴上对称,右手能到的点,左手也能到
+                octomap::point3d mirrorpoint = point;
+                mirrorpoint.y() = -point.y();
+                octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
+                if (mirrornode != nullptr){
+                    mirrornode->setValue(1.0);
+                    tree.updateNode(mirrorpoint, true);
+                    batchNewvisitPointCount++;
+                    std::cout << mirrorpoint.x() << " " << mirrorpoint.y() << " " << mirrorpoint.z() << std::endl;
+                }*/
                 //std::cout << "after node->getOccupancy(): " << node->getOccupancy() << std::endl;
                 //std::cout << "after node->getValue(): " << node->getValue() << std::endl;
+            }
+            octomap::point3d mirrorpoint = point;
+            mirrorpoint.y() = -point.y();
+            octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
+            if (mirrornode != nullptr){
+                tree.updateNode(mirrorpoint, true);
+                mirrornode->setValue(1.0);
+                batchNewvisitPointCount++;
+                //std::cout << mirrorpoint.x() << " " << mirrorpoint.y() << " " << mirrorpoint.z() << std::endl;
             }
             /*else{
                 std::cout << "node is nullptr" << std::endl;
@@ -171,7 +194,7 @@ bool FK(octomap::OcTree& tree, std::vector<Eigen::VectorXd>& randomsampleconfigs
             //tree.prune();
             //return tree;
         }
-        else if (batchPointCount%100 == 0 && static_cast<double>(batchNewvisitPointCount)/static_cast<double>(treeSize) > 0.01){
+        else if (batchPointCount%100 == 0 && static_cast<double>(batchNewvisitPointCount)/static_cast<double>(treeSize) > 0.1){
             IKflag = false;
             return false;
         }
@@ -307,13 +330,15 @@ int main() {
     jointTorqueLimits << 373.52, 213.44, 213.44, 10.17, 94.19, 94.22, 50.44, 49.88, 18.69, 18.59, 10.17, 94.19, 94.22,
         50.44, 49.88, 18.69, 18.59, 10.17;
     std::cout << "jointTorqueLimits: " << jointTorqueLimits.transpose() << std::endl;
-    bool collisionFlag = checkCollision(m1, world);
-    bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
-
+    //bool collisionFlag = checkCollision(m1, world);
+    //bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
+    bool collisionFlag = false;
+    bool jointTorqueFlag = false;
+    
     // 离散化空间并存储在 octomap::OcTree 中
-    double x_min = 0.0, x_max = 1.2;
+    double x_min = 0.0, x_max = 1.6;
     double y_min = -0.8, y_max = 0.8;
-    double z_min = 0.0, z_max = 1.6;
+    double z_min = 0.0, z_max = 1.8;
     std::vector<double> samplebound = {x_min, x_max, y_min, y_max, z_min, z_max};
     SampleSpacePoint sampleSpace(samplebound);
     octomap::OcTree tree = sampleSpace.m_tree; // 使用引用来访问 m_tree
@@ -332,7 +357,7 @@ int main() {
     // 计算正运动学
     double ratio = 6/100;
     bool IKflag = false;
-    IKflag = FK(tree, randomsampleconfigs, m1, collisionFlag, jointTorqueFlag, ratio, revoluteJointIndex, singlechaindofs, revoluteJointCount, config, treeSize, IKflag, samplebound);
+    IKflag = FK(tree, randomsampleconfigs, m1, collisionFlag, jointTorqueFlag, ratio, revoluteJointIndex, singlechaindofs, revoluteJointCount, config, treeSize, IKflag, samplebound, world, jointTorqueLimits);
     if (IKflag) {
         IK(tree, m1, collisionFlag, jointTorqueFlag);
     }
@@ -434,8 +459,14 @@ int main() {
     // float zAxisOffset = (z_max - z_min) / 2.0;
     float zAxisOffset = 0.9;
     ::osg::Vec3 up_xzView = ::osg::Vec3(0.0, 0.0, 1.0);
-    viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),
+    /*viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),
                                                     ::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
+    viewer->setCameraManipulator(viewer->getCameraManipulator());*/
+
+    viewer->setCameraManipulator(new osgGA::TrackballManipulator());
+    viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),
+                                                    ::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), 
+                                                    up_xzView);
     viewer->setCameraManipulator(viewer->getCameraManipulator());
 
     auto end = std::chrono::steady_clock::now();
