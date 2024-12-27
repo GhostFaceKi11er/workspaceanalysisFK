@@ -2671,7 +2671,8 @@ CMakeFiles/fkws.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/dart/gui/osg/render/SphereShapeNode.hpp \
   /usr/include/dart/gui/osg/render/VoxelGridShapeNode.hpp \
   /usr/include/dart/gui/osg/render/WarningShapeNode.hpp \
-  ../src/SpaceSampler.h
+  ../src/SpaceSampler.h \
+  /usr/include/osgGA/TrackballManipulator
 
 
 /usr/include/dart/gui/osg/render/VoxelGridShapeNode.hpp:
@@ -3085,6 +3086,8 @@ CMakeFiles/fkws.dir/src/main.cpp.o: ../src/main.cpp \
 /usr/include/x86_64-linux-gnu/sys/stat.h:
 
 /usr/include/spdlog/details/os.h:
+
+/usr/include/osgGA/TrackballManipulator:
 
 /usr/include/dart/dynamics/PlaneShape.hpp:
 

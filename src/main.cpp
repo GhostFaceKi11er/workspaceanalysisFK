@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <octomap/octomap.h>
 #include <dart/dart.hpp>
 #include <dart/utils/urdf/DartLoader.hpp>
@@ -13,15 +14,40 @@
 #include "SpaceSampler.h"
 #include <osgGA/TrackballManipulator>
 #include <chrono>
+#include <filesystem> 
 //#include <octovis/octovis.h>
 // 修正类定义
+void saveNewVisitPointCount(int count, const std::string& filename) {
+    std::ofstream outFile(filename);
+    if (outFile.is_open()) {
+        outFile << count;
+        outFile.close();
+        std::cout << "NewVisitPointCount saved to " << filename << std::endl;
+    } else {
+        std::cerr << "Unable to open file for writing: " << filename << std::endl;
+    }
+}
+
+int loadNewVisitPointCount(const std::string& filename) {
+    std::ifstream inFile(filename);
+    int count = 0;
+    if (inFile.is_open()) {
+        inFile >> count;
+        inFile.close();
+        std::cout << "NewVisitPointCount loaded from " << filename << std::endl;
+    } else {
+        std::cerr << "Unable to open file for reading: " << filename << std::endl;
+    }
+    return count;
+}
+
 class SampleSpacePoint {
 public:
     SampleSpacePoint(const std::vector<double>& samplebound) 
-        : m_tree(0.01) { // 初始化 m_tree，指定分辨率
-        for (double x = samplebound[0]; x <= samplebound[1]; x += 0.01) {
-            for (double y = samplebound[2]; y <= samplebound[3]; y += 0.01) {
-                for (double z = samplebound[4]; z <= samplebound[5]; z += 0.01) {
+        : m_tree(0.005) { // 初始化 m_tree，指定分辨率
+        for (double x = samplebound[0]; x <= samplebound[1]; x += 0.005) {
+            for (double y = samplebound[2]; y <= samplebound[3]; y += 0.005) {
+                for (double z = samplebound[4]; z <= samplebound[5]; z += 0.005) {
                     m_tree.updateNode(octomap::point3d(x, y, z), false);
                 }
             }
@@ -116,28 +142,34 @@ Eigen::VectorXd getConfig(std::vector<int> revoluteJointIndex, dart::dynamics::S
             double upper = joint->getPositionUpperLimit(0);
             // 创建随机分布
             //std::uniform_real_distribution<> dis(lower, upper);
-            double randomAngle = generateRandom(lower, upper, 0.4);
+            double randomAngle = generateRandom(lower, upper, 0.02);
             config[index] = randomAngle;
             index++;
         }
     }
-    //std::cout << "index: " << index << std::endl;
-    //std::cout << "singlechaindofs-1: " << singlechaindofs-1 << std::endl;
-    //std::cout << "revoluteJointCount-singlechaindofs: " << revoluteJointCount-singlechaindofs << std::endl;
-    //std::cout << "singlechaindofs-(revoluteJointCount-singlechaindofs)-1: " << singlechaindofs-(revoluteJointCount-singlechaindofs)-1 << std::endl;
     config.segment(singlechaindofs, revoluteJointCount-singlechaindofs) = config.segment(singlechaindofs-(revoluteJointCount-singlechaindofs), revoluteJointCount-singlechaindofs);
     //std::cout << "config: " << config.transpose() << std::endl;
     return config;
 }
 
-bool FK(octomap::OcTree& tree, std::vector<Eigen::VectorXd>& randomsampleconfigs, dart::dynamics::SkeletonPtr m1, bool collisionFlag, 
-    bool jointTorqueFlag, double ratio, std::vector<int> revoluteJointIndex, int singlechaindofs, int revoluteJointCount, Eigen::VectorXd& config, int treeSize, bool& IKflag, std::vector<double>& samplebound, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits){
+bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std::vector<int> revoluteJointIndex, 
+    int singlechaindofs, int revoluteJointCount, Eigen::VectorXd& config, 
+    int treeSize, bool& IKflag, std::vector<double>& samplebound, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits, int& NewvisitPointCount){
     //FK
     //std::vector<Eigen::VectorXd> sampledpositions;
-    int batchPointCount = 0;
-    int batchNewvisitPointCount = 0;
+    
+    int totalPointCount = 0;
+    double constant = 2;
 
-    while(batchNewvisitPointCount <= treeSize){
+    auto start_time = std::chrono::steady_clock::now();
+    auto interval_time = std::chrono::minutes(1);
+    auto target_time = start_time + interval_time;
+    while(true){
+        auto current_time = std::chrono::steady_clock::now();
+        if (current_time == target_time && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) == constant){ // 如果新访问的点数占总点数的比例不再增加，则停止循环
+            std::cout << "No more new points" << std::endl;
+            break;
+        }
         config = getConfig(revoluteJointIndex, m1, config, singlechaindofs, revoluteJointCount);
         m1->setPositions(config);
         //std::cout << "set positions" << std::endl;
@@ -149,61 +181,59 @@ bool FK(octomap::OcTree& tree, std::vector<Eigen::VectorXd>& randomsampleconfigs
         octomap::point3d point(positions[0], positions[1], positions[2]);
 
         if (point.x() > samplebound[0] && point.x() < samplebound[1] && point.y() > samplebound[2] && point.y() < samplebound[3] && point.z() > samplebound[4] && point.z() < samplebound[5]){ // 判断点是否在有效范围内
-            collisionFlag = checkCollision(m1, world);
-            jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
+            //NewvisitPointCount++;
             octomap::OcTreeNode* node = tree.search(point);
-            if (node != nullptr && !collisionFlag && !jointTorqueFlag){
-                //std::cout << "before node->getOccupancy(): " << node->getOccupancy() << std::endl;
-                //std::cout << "before node->getValue(): " << node->getValue() << std::endl;
-                tree.updateNode(point, true);
-                node->setValue(1.0);
-                batchNewvisitPointCount++;
-                /*std::cout << point.x() << " " << point.y() << " " << point.z() << std::endl;
-                // 对称点, 对称点在y轴上对称,右手能到的点,左手也能到
-                octomap::point3d mirrorpoint = point;
-                mirrorpoint.y() = -point.y();
-                octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
-                if (mirrornode != nullptr){
-                    mirrornode->setValue(1.0);
-                    tree.updateNode(mirrorpoint, true);
-                    batchNewvisitPointCount++;
-                    std::cout << mirrorpoint.x() << " " << mirrorpoint.y() << " " << mirrorpoint.z() << std::endl;
-                }*/
-                //std::cout << "after node->getOccupancy(): " << node->getOccupancy() << std::endl;
-                //std::cout << "after node->getValue(): " << node->getValue() << std::endl;
+            if (node != nullptr && node->getValue() != 1){ // 如果节点存在且节点值不为1，则更新节点值为1。如果节点值为1，则说明该点已经被访问过
+                bool collisionFlag = checkCollision(m1, world);
+                bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
+                //std::cout << "collisionFlag: " << collisionFlag << " jointTorqueFlag: " << jointTorqueFlag << std::endl;
+                if (!collisionFlag && !jointTorqueFlag){ // 如果节点存在且节点值不为1，并且没有碰撞和关节力矩限制，则更新节点值为1。
+                    //std::cout << "before node->getOccupancy(): " << node->getOccupancy() << std::endl;
+                    //std::cout << "before node->getValue(): " << node->getValue() << std::endl;
+                    tree.updateNode(point, true);
+                    //node->setValue(1.0);
+                    NewvisitPointCount++;
+                    //std::cout << "after node->getOccupancy(): " << node->getOccupancy() << std::endl;
+                    //std::cout << "after node->getValue(): " << node->getValue() << std::endl;
+                }
             }
-            octomap::point3d mirrorpoint = point;
+            octomap::point3d mirrorpoint = point; // 对称点, 对称点在y轴上对称,右手能到的点,左手也能到
             mirrorpoint.y() = -point.y();
             octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
-            if (mirrornode != nullptr){
-                tree.updateNode(mirrorpoint, true);
-                mirrornode->setValue(1.0);
-                batchNewvisitPointCount++;
-                //std::cout << mirrorpoint.x() << " " << mirrorpoint.y() << " " << mirrorpoint.z() << std::endl;
+            if (mirrornode != nullptr && mirrornode->getValue() != 1){ // 如果节点存在且节点值不为1，则更新节点值为1。
+                bool collisionFlag = checkCollision(m1, world);
+                bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
+                if (!collisionFlag && !jointTorqueFlag){ // 如果节点存在且节点值不为1，并且没有碰撞和关节力矩限制，则更新节点值为1。
+                    //std::cout << "before node->getOccupancy(): " << mirrornode->getOccupancy() << std::endl;
+                    tree.updateNode(mirrorpoint, true); 
+                    //mirrornode->setValue(1.0);
+                    NewvisitPointCount++;
+                    //std::cout << "after node->getOccupancy(): " << mirrornode->getOccupancy() << std::endl;
+                }
             }
-            /*else{
-                std::cout << "node is nullptr" << std::endl;
-            }*/
         }
-        batchPointCount++;
-        std::cout << "batchPointCount: " << batchPointCount << std::endl;
-        std::cout << "batchNewvisitPointCount: " << batchNewvisitPointCount << " " << static_cast<double>(batchNewvisitPointCount)/static_cast<double>(treeSize)*100 << "%" << std::endl;
-        if (batchPointCount%100 == 0 && static_cast<double>(batchNewvisitPointCount)/static_cast<double>(batchPointCount) < ratio) {
+        totalPointCount++;
+        //std::cout << "totalPointCount: " << totalPointCount << std::endl;
+        std::cout << "NewvisitPointCount: " << NewvisitPointCount << " " << static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize)*100 << "%" << std::endl;
+        if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(totalPointCount) < ratio) {
+            std::cout << "static_cast<double>(NewvisitPointCount)/static_cast<double>(totalPointCount) < ratio" << std::endl;
             IKflag = true;
             return true;
-            //tree.prune();
-            //return tree;
         }
-        else if (batchPointCount%100 == 0 && static_cast<double>(batchNewvisitPointCount)/static_cast<double>(treeSize) > 0.1){
+        else if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) >= 0.01){
+            //tree.prune();
             IKflag = false;
+            std::cout << "static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize): " << static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) << std::endl;
             return false;
         }
+        constant = static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize);
+        target_time = start_time + interval_time;
     }
-    tree.prune();
+    //tree.prune();
     return false;
 }
 
-void IK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, bool collisionFlag, bool jointTorqueFlag) {//IK
+void IK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits) {//IK
         std::cout << "IK" << std::endl;
         for (auto it = tree.begin_leafs(), end = tree.end_leafs(); it != end; ++it) {
             if (it->getValue() != 1) {
@@ -212,6 +242,8 @@ void IK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, bool collisionFla
 
                 // 假设有一个函数 solveIK(targetPosition) 返回是否有解
                 bool hasSolution = solveIK(m1, targetPosition);
+                bool collisionFlag = checkCollision(m1, world);
+                bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
 
                 if (hasSolution && !collisionFlag && !jointTorqueFlag) {
                     //it->setValue(1);
@@ -223,6 +255,7 @@ void IK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, bool collisionFla
             }
         }
     }
+
 
 void convertToOctomapPointcloud(const std::vector<Eigen::Vector3d>& boundaryPoints, octomap::Pointcloud& octoCloud) {
     // 清空 octomap::Pointcloud
@@ -312,14 +345,17 @@ private:
 };
 
 int main() {
-    auto start = std::chrono::steady_clock::now();
+    std::string treefilePath = "/home/haitaoxu/fkws/M1_full.bt";
+
+    auto start_time = std::chrono::steady_clock::now();
+    auto interval_time = std::chrono::minutes(5);
+
     dart::simulation::WorldPtr world = dart::simulation::World::create();
     dart::utils::DartLoader urdf;
-
-    // 加载 URDF 文件
-    dart::dynamics::SkeletonPtr m1 = urdf.parseSkeleton("/home/haitaoxu/fkws/models/M1/M1_full.urdf");
+    dart::dynamics::SkeletonPtr m1 = urdf.parseSkeleton("/home/haitaoxu/fkws/models/M1/M1_full.urdf");  // 加载 URDF 文件
     world->addSkeleton(m1);
-    //std::cout << m1->getNumDofs() << std::endl;
+    dart::dynamics::SkeletonPtr ground = urdf.parseSkeleton("/home/haitaoxu/fkws/models/Environment/ground_terrain.urdf");
+    world->addSkeleton(ground);
 
     for (size_t i = 0; i < m1->getNumJoints(); ++i) { //注意： getNumJoints() 返回的是所有关节的数量，而 getNumDofs() 返回的是自由度的数量
         auto joint = m1->getJoint(i);
@@ -330,13 +366,10 @@ int main() {
     jointTorqueLimits << 373.52, 213.44, 213.44, 10.17, 94.19, 94.22, 50.44, 49.88, 18.69, 18.59, 10.17, 94.19, 94.22,
         50.44, 49.88, 18.69, 18.59, 10.17;
     std::cout << "jointTorqueLimits: " << jointTorqueLimits.transpose() << std::endl;
-    //bool collisionFlag = checkCollision(m1, world);
-    //bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
-    bool collisionFlag = false;
-    bool jointTorqueFlag = false;
     
+    double resolution = 0.008;
     // 离散化空间并存储在 octomap::OcTree 中
-    double x_min = 0.0, x_max = 1.6;
+    double x_min = 0.0, x_max = 1.8;
     double y_min = -0.8, y_max = 0.8;
     double z_min = 0.0, z_max = 1.8;
     std::vector<double> samplebound = {x_min, x_max, y_min, y_max, z_min, z_max};
@@ -345,27 +378,38 @@ int main() {
     int treeSize = tree.size();
     std::cout << "tree.size(): " << tree.size() << std::endl;
 
-    std::cout << "随机采样关节角度" << std::endl;
-    std::vector<Eigen::VectorXd> randomsampleconfigs; // 用于存储所有随机配置
-
     Eigen::VectorXd config = Eigen::VectorXd::Zero(m1->getNumDofs()); // 初始化配置向量
     
     int singlechaindofs = 11; // 假设单链的自由度数量
     int revoluteJointCount = m1->getNumDofs();
     std::vector<int> revoluteJointIndex = getrevoluteJointIndex(m1,  singlechaindofs);
-    std::cout << "FK" << std::endl;
-    // 计算正运动学
-    double ratio = 6/100;
-    bool IKflag = false;
-    IKflag = FK(tree, randomsampleconfigs, m1, collisionFlag, jointTorqueFlag, ratio, revoluteJointIndex, singlechaindofs, revoluteJointCount, config, treeSize, IKflag, samplebound, world, jointTorqueLimits);
-    if (IKflag) {
-        IK(tree, m1, collisionFlag, jointTorqueFlag);
+
+    std::string filename = "NewvisitPointCount.txt";
+    int NewvisitPointCount = loadNewVisitPointCount(filename);
+    if (NewvisitPointCount != 0){
+        std::cout << "Loaded NewvisitPointCount: " << NewvisitPointCount << std::endl;
     }
-    tree.prune();
+    else{
+        std::cout << "NewvisitPointCount is 0" << std::endl;
+    }
 
-    //tree.writeBinary("/home/haitaoxu/fkws/M1_full.bt");
+    bool continueFlag = true; //是否继续进行正运动学遍历
+    // 如果树文件存在，则读取树文件
+    if (std::filesystem::exists(treefilePath)){
+        tree.readBinary(treefilePath);
+        std::cout << "read binary success. tree.size(): " << tree.size() << std::endl;
+    }
+    
+    if (continueFlag){
+        std::cout << "FK" << std::endl; // 计算正运动学
+        double ratio = 6/100;
+        bool IKflag = false;
+        IKflag = FK(tree, m1, ratio, revoluteJointIndex, singlechaindofs, revoluteJointCount, config, treeSize, IKflag, samplebound, world, jointTorqueLimits, NewvisitPointCount);
+        if (IKflag) { // 如果计算正运动学遍历不完，则继续进行逆运动学
+            IK(tree, m1, world, jointTorqueLimits);
+        }
+    }
 
-    double resolution = 0.01;
     auto pointCloudFrame = createPointCloudFrame(); //createPointCloudFrame 函数创建一个 SimpleFrame，用于表示点云在仿真环境中的位置和方向。
     auto pointCloudShape = std::dynamic_pointer_cast<dart::dynamics::PointCloudShape>(pointCloudFrame->getShape());
 
@@ -376,20 +420,16 @@ int main() {
         octomap::OcTreeNode* node = &(*it);
         //std::cout << "pcl node->getOccupancy(): " << node->getOccupancy() << std::endl;
         //std::cout << "pcl node->getValue(): " << node->getValue() << std::endl;
-        if (node->getValue() == 1) {
+        if (node->getOccupancy() > 0.5) {
             //std::cout << "it->getValue() == 1" << std::endl;
             octomap::point3d point = it.getCoordinate();
             pointCloud.push_back(point.x(), point.y(), point.z());
             colors.push_back({0, 0, 1, 0.5});
             //std::cout << "pcl pointCloud.size(): " << pointCloud.size() << std::endl;
         }
-        /*else{
-            //std::cout << "it->getValue() == 0" << std::endl;
-            octomap::point3d point = it.getCoordinate();
-            pointCloud.push_back(point.x(), point.y(), point.z());
-            colors.push_back({0, 1, 0, 0.5});
-        }*/
     }
+
+
     std::cout << "pcl pointCloud.size(): " << pointCloud.size() << std::endl;
     pointCloudShape->setVisualSize(resolution);
 
@@ -433,11 +473,6 @@ int main() {
     // 可视化时skel变回零位
     m1->setPositions(Eigen::VectorXd(revoluteJointCount).setZero());
     m1->getJoint(0)->setTransformFromParentBodyNode(Eigen::Isometry3d::Identity());
-    //world->addSkeleton(m1);
-    
-    /*dart::dynamics::SkeletonPtr ground =
-        urdfLoader.parseSkeleton("/home/angli/Agile/m1algorithm/models/Environment/ground_terrain.urdf");
-    world->addSkeleton(ground); */
 
     Eigen::Vector3d gravity(0.0, 0.0, 0.0);
     world->setGravity(gravity);
@@ -459,18 +494,17 @@ int main() {
     // float zAxisOffset = (z_max - z_min) / 2.0;
     float zAxisOffset = 0.9;
     ::osg::Vec3 up_xzView = ::osg::Vec3(0.0, 0.0, 1.0);
-    /*viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),
-                                                    ::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
-    viewer->setCameraManipulator(viewer->getCameraManipulator());*/
 
     viewer->setCameraManipulator(new osgGA::TrackballManipulator());
-    viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),
-                                                    ::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), 
-                                                    up_xzView);
+    viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
     viewer->setCameraManipulator(viewer->getCameraManipulator());
 
+    tree.writeBinary(treefilePath);
+    std::cout << "save tree.writeBinary success" << std::endl;
+    saveNewVisitPointCount(NewvisitPointCount, filename);
+
     auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);  // 计算时间差
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time);  // 计算时间差
     std::cout << "Elapsed time: " << duration.count() << " milliseconds\n";  // 输出结果，单位是毫秒
 
     viewer->run();
