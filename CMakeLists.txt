@@ -1,15 +1,32 @@
 cmake_minimum_required(VERSION 3.10)
-project(fkws)
+project(Simulation)
+
+include(CTest)
+#=============================================================================
+## CMake Flags
+##=============================================================================
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug | Release | RelWithDebInfo | MinSizeRel" FORCE)
+endif()
 
 # 设置 C++ 标准
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+
+##=============================================================================
+## Build Setup
+##=============================================================================
+set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib )
+set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin )
+set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 
 # 查找 DART 库   /usr/local/lib/libdart-external-odelcpsolver.so.6.15.0   /usr/local/share/dart/cmake/dart_external-odelcpsolverTargets.cmake
 find_package(DART 6.14 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 
 # 查找 OctoMap 库 
-find_package(octomap REQUIRED)
+#find_package(octomap REQUIRED)
 
 #find_package(octovis REQUIRED)
 
@@ -28,14 +45,9 @@ link_directories(
     #/usr/local/lib    # Octovis 库文件路径
 )
 
-# 添加源文件
-file(GLOB SOURCES "src/*.cpp")
-
-# 创建可执行文件
-add_executable(fkws ${SOURCES})
 
 # 链接依赖库
-target_link_libraries(fkws 
+link_libraries(
     ${DART_LIBRARIES}          # DART 库
     assimp                     # DART 的 Assimp 依赖库
     fcl                        # 碰撞检测库
@@ -44,3 +56,6 @@ target_link_libraries(fkws
     ${OCTOMAP_LIBRARIES}       # OctoMap 库
     #${OCTOVIS_LIBRARIES}       # Octovis 库
 )
+
+add_subdirectory(workspaceanalysis)
+add_subdirectory(examples)
