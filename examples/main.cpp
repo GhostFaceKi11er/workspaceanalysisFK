@@ -151,10 +151,10 @@ private:
     int m_revoluteJointCount;
 };
 
-bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std::vector<int> revoluteJointIndex, bool& IKflag, std::vector<double>& samplebound, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits, int& NewvisitPointCount, RandomJointsConfigs& randomJointsConfigs){
+bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std::vector<int> revoluteJointIndex, bool& IKflag, std::vector<double>& samplebound, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits, int& NewvisitPointCount, RandomJointsConfigs& randomJointsConfigs, int treeSize){
     int totalPointCount = 0;
     double constant = 2;
-    int treeSize = tree.size();
+    //int treeSize = tree.size();
 
     auto start_time = std::chrono::steady_clock::now();
     auto interval_time = std::chrono::minutes(1);
@@ -176,36 +176,20 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
         octomap::point3d point(positions[0], positions[1], positions[2]);
 
         if (point.x() > samplebound[0] && point.x() < samplebound[1] && point.y() > samplebound[2] && point.y() < samplebound[3] && point.z() > samplebound[4] && point.z() < samplebound[5]){ // 判断点是否在有效范围内
-            //NewvisitPointCount++;
             octomap::OcTreeNode* node = tree.search(point);
-            if (node != nullptr && node->getValue() != 1){ // 如果节点存在且节点值不为1，则更新节点值为1。如果节点值为1，则说明该点已经被访问过
-                bool collisionFlag = checkCollision(m1, world);
-                bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
-                //std::cout << "collisionFlag: " << collisionFlag << " jointTorqueFlag: " << jointTorqueFlag << std::endl;
-                if (!collisionFlag && !jointTorqueFlag){ // 如果节点存在且节点值不为1，并且没有碰撞和关节力矩限制，则更新节点值为1。
-                    //std::cout << "before node->getOccupancy(): " << node->getOccupancy() << std::endl;
-                    //std::cout << "before node->getValue(): " << node->getValue() << std::endl;
-                    tree.updateNode(point, true);
-                    //node->setValue(1.0);
-                    NewvisitPointCount++;
-                    //std::cout << "after node->getOccupancy(): " << node->getOccupancy() << std::endl;
-                    //std::cout << "after node->getValue(): " << node->getValue() << std::endl;
-                    }
-                }
+            bool collisionFlag = checkCollision(m1, world);
+            bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
+            if (node == nullptr && !collisionFlag && !jointTorqueFlag) {
+                tree.updateNode(point, true);
+                NewvisitPointCount++;
+            }
             octomap::point3d mirrorpoint = point; // 对称点, 对称点在y轴上对称,右手能到的点,左手也能到
             mirrorpoint.y() = -point.y();
             octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
-            if (mirrornode != nullptr && mirrornode->getValue() != 1){ // 如果节点存在且节点值不为1，则更新节点值为1。
-                bool collisionFlag = checkCollision(m1, world);
-                bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
-                if (!collisionFlag && !jointTorqueFlag){ // 如果节点存在且节点值不为1，并且没有碰撞和关节力矩限制，则更新节点值为1。
-                    //std::cout << "before node->getOccupancy(): " << mirrornode->getOccupancy() << std::endl;
-                    tree.updateNode(mirrorpoint, true); 
-                    //mirrornode->setValue(1.0);
-                    NewvisitPointCount++;
-                    //std::cout << "after node->getOccupancy(): " << mirrornode->getOccupancy() << std::endl;
-                    }
-                }
+            if (mirrornode == nullptr && !collisionFlag && !jointTorqueFlag) {
+                tree.updateNode(mirrorpoint, true);
+                NewvisitPointCount++;
+            }
         }
         totalPointCount++;
         //std::cout << "totalPointCount: " << totalPointCount << std::endl;
@@ -215,8 +199,7 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
             IKflag = true;
             return true;
             }
-        else if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) >= 0.9){
-            //tree.prune();
+        else if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) >= 0.7){
             IKflag = false;
             std::cout << "static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize): " << static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) << std::endl;
             return false;
@@ -224,7 +207,6 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
         constant = static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize);
         target_time = start_time + interval_time;
     }
-    //tree.prune();
     return false;
 }
 
@@ -379,7 +361,13 @@ int main() {
     dart::dynamics::SkeletonPtr ground = urdf.parseSkeleton("/home/haitaoxu/workspaceanalysis/models/Environment/ground_terrain.urdf");
     world->addSkeleton(ground);
 
-    bool continueFlag = true; //是否继续进行正运动学遍历
+    enum ProgramProcessMode{
+    ProgramProcessMode_Initial = 0,
+    ProgramProcessMode_Continue = 1,
+    ProgramProcessMode_Visualize = 2,
+    };
+    ProgramProcessMode ProgramProcessMode = ProgramProcessMode_Continue;
+
 
     Eigen::VectorXd jointTorqueLimits = Eigen::VectorXd(m1->getNumDofs()).setOnes(); // 可以手动修改关节力矩限制(修改时要注意joint数！)
     jointTorqueLimits << 373.52, 213.44, 213.44, 10.17, 94.19, 94.22, 50.44, 49.88, 18.69, 18.59, 10.17, 94.19, 94.22, 50.44, 49.88, 18.69, 18.59, 10.17;
@@ -390,8 +378,16 @@ int main() {
     double y_min = -0.8, y_max = 0.8;
     double z_min = 0.0, z_max = 1.8;
     std::vector<double> samplebound = {x_min, x_max, y_min, y_max, z_min, z_max};
-    SampleOcTree sampleOcTree(samplebound);
-    octomap::OcTree& tree = sampleOcTree.m_tree; // 使用引用来访问 m_tree
+
+    //SampleOcTree sampleOcTree(samplebound);
+    //octomap::OcTree tree_sample = sampleOcTree.m_tree; // 使用引用来访问 m_tree
+    //std::cout << "tree_sample.size():" << tree_sample.size() << std::endl; //这样离散初始化OcTree的大小远远小于真实值！！！！！！
+    SpaceSampler sampler;
+    std::vector<Eigen::Vector3d> samplePoints;
+    sampler.SpaceSampler::Discretize3DSpace(Eigen::Map<Eigen::Vector6d>(samplebound.data()), resolution, samplePoints); //这样才能得到正确的离散的所有点
+    int samplePointsSize = samplePoints.size();
+    std::cout << "samplePointsSize: " << samplePointsSize << std::endl;
+    octomap::OcTree tree(0.01);
 
     Eigen::VectorXd config = Eigen::VectorXd::Zero(m1->getNumDofs()); //注意： getNumJoints() 返回的是所有关节的数量，而 getNumDofs() 返回的是自由度的数量
     
@@ -399,33 +395,54 @@ int main() {
     int revoluteJointCount = m1->getNumDofs();
     RandomJointsConfigs randomJointsConfigs(m1, singlechaindofs, config, revoluteJointCount);
     std::vector<int> revoluteJointIndex = randomJointsConfigs.getrevoluteJointIndex();
-    
-    std::string filename = "NewvisitPointCount.txt";
-    SaveLoadNewVisitPointCount SaveLoadNewVisitPointCount(filename);
-    int NewvisitPointCount = SaveLoadNewVisitPointCount.loadNewVisitPointCount();
-    if (NewvisitPointCount != 0){
-        std::cout << "Loaded NewvisitPointCount: " << NewvisitPointCount << std::endl;
-        }
-    else{
-        std::cout << "NewvisitPointCount is 0" << std::endl;
-        }
 
-    
-    if (std::filesystem::exists(treefilePath)){ // 如果树文件存在，则读取树文件
-        tree.readBinary(treefilePath);
-        std::cout << "read binary success. tree.size(): " << tree.size() << std::endl;
-        }
-    
-    if (continueFlag){ //如果continueFlag为true，则继续进行正运动学遍历
+    std::string filename = "/home/haitaoxu/workspaceanalysis/NewvisitPointCount.txt";
+    SaveLoadNewVisitPointCount SaveLoadNewVisitPointCount(filename);
+    int NewvisitPointCount = 0;
+
+    if (ProgramProcessMode == ProgramProcessMode_Initial){
+        std::cout << "ProgramProcessMode_Initial" << std::endl;
+
         std::cout << "FK" << std::endl; // 计算正运动学
         double ratio = 6/100;
         bool IKflag = false;
-        IKflag = FK(tree, m1, ratio, revoluteJointIndex, IKflag, samplebound, world, jointTorqueLimits, NewvisitPointCount, randomJointsConfigs);
+        IKflag = FK(tree, m1, ratio, revoluteJointIndex, IKflag, samplebound, world, jointTorqueLimits, NewvisitPointCount, randomJointsConfigs, samplePointsSize);
         if (IKflag) { // 如果计算正运动学遍历不完，则继续进行逆运动学
             IK IK(m1, tree, world, jointTorqueLimits);
             IK.ik();
             }
-        }   
+    }
+    else if (ProgramProcessMode == ProgramProcessMode_Continue){
+        std::cout << "ProgramProcessMode_Continue" << std::endl;
+
+        NewvisitPointCount = SaveLoadNewVisitPointCount.loadNewVisitPointCount();
+        if (std::filesystem::exists(treefilePath)){ // 如果树文件存在，则读取树文件
+            tree.readBinary(treefilePath);
+
+            std::cout << "FK" << std::endl; // 计算正运动学
+            double ratio = 6/100;
+            bool IKflag = false;
+            IKflag = FK(tree, m1, ratio, revoluteJointIndex, IKflag, samplebound, world, jointTorqueLimits, NewvisitPointCount, randomJointsConfigs, samplePointsSize);
+            if (IKflag) { // 如果计算正运动学遍历不完，则继续进行逆运动学
+                IK IK(m1, tree, world, jointTorqueLimits);
+                IK.ik();
+            }
+        }
+        else{
+            std::cout << "treefilePath not exists" << std::endl;
+        }
+    }
+    else if (ProgramProcessMode == ProgramProcessMode_Visualize){
+        std::cout << "ProgramProcessMode_Visualize" << std::endl;
+
+        NewvisitPointCount = SaveLoadNewVisitPointCount.loadNewVisitPointCount();
+        if (std::filesystem::exists(treefilePath)){ // 如果树文件存在，则读取树文件
+            tree.readBinary(treefilePath);
+        }
+        else{
+            std::cout << "treefilePath not exists" << std::endl;
+        }
+    }
 
     auto pointCloudFrame = createPointCloudFrame(); //createPointCloudFrame 函数创建一个 SimpleFrame，用于表示点云在仿真环境中的位置和方向。
     auto pointCloudShape = std::dynamic_pointer_cast<dart::dynamics::PointCloudShape>(pointCloudFrame->getShape());
@@ -433,24 +450,24 @@ int main() {
     octomap::Pointcloud pointCloud;
     pointCloud.clear();
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> colors; //这段代码定义了一个名为 colors 的 std::vector 容器，其元素类型为 Eigen::Vector4d，同时使用了 Eigen::aligned_allocator 来管理内存对齐。以下是详细解析。
-    for (auto it = tree.begin_leafs(), end = tree.end_leafs(); it != end; ++it) {
+    for (auto it = tree.begin(), end = tree.end(); it != end; ++it) {
         octomap::OcTreeNode* node = &(*it);
         //std::cout << "pcl node->getOccupancy(): " << node->getOccupancy() << std::endl;
-        //std::cout << "pcl node->getValue(): " << node->getValue() << std::endl;
-        if (node->getOccupancy() > 0.5) {
+        
+        if (node->getOccupancy() >= 0.5) {
             //std::cout << "it->getValue() == 1" << std::endl;
+            //std::cout << "pcl node->getValue(): " << node->getValue() << std::endl;
             octomap::point3d point = it.getCoordinate();
             pointCloud.push_back(point.x(), point.y(), point.z());
             colors.push_back({0, 0, 1, 0.5});
             //std::cout << "pcl pointCloud.size(): " << pointCloud.size() << std::endl;
         }
     }
-
     std::cout << "pcl pointCloud.size(): " << pointCloud.size() << std::endl;
     pointCloudShape->setVisualSize(resolution);
 
     // 添加工作区间的边界线
-    SpaceSampler sampler;
+    //SpaceSampler sampler;
     std::vector<Eigen::Vector3d> boundaryPoints = sampler.get3dBoundaryPoints(resolution, samplebound);
 
     for (auto point : boundaryPoints) {

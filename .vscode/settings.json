@@ -146,7 +146,8 @@
         "sparseqr": "cpp",
         "stdvector": "cpp",
         "tensor": "cpp",
-        "threadpool": "cpp"
+        "threadpool": "cpp",
+        "math": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++-11"
 }
