@@ -106,8 +106,8 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//Enable/Disable output of compile commands during generation.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=
+//No help, variable specified on the command line.
+CMAKE_EXPORT_COMPILE_COMMANDS:UNINITIALIZED=ON
 
 //Install path prefix, prepended onto install directories.
 CMAKE_INSTALL_PREFIX:PATH=/usr/local
@@ -388,7 +388,7 @@ TINYXML2_INCLUDE_DIRS:PATH=/usr/include
 TINYXML2_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libtinyxml2.so
 
 //Dependencies for the target
-WorkSpaceAnalysis_LIB_DEPENDS:STATIC=general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;fcl;general;ccd;general;m;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;fcl;general;ccd;general;m;general;/usr/lib/x86_64-linux-gnu/liboctomap.so;general;/usr/lib/x86_64-linux-gnu/liboctomath.so;
+WorkSpaceAnalysis_LIB_DEPENDS:STATIC=general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;fcl;general;ccd;general;m;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;dart-utils-urdf;general;dart-gui-osg;general;dart;general;fcl;general;ccd;general;m;general;/usr/lib/x86_64-linux-gnu/liboctomap.so;general;/usr/lib/x86_64-linux-gnu/liboctomath.so;
 
 //The directory containing a CMake configuration file for console_bridge.
 console_bridge_DIR:PATH=/usr/lib/x86_64-linux-gnu/console_bridge/cmake
@@ -499,8 +499,6 @@ CMAKE_EXE_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
 CMAKE_EXE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_EXPORT_COMPILE_COMMANDS
-CMAKE_EXPORT_COMPILE_COMMANDS-ADVANCED:INTERNAL=1
 //Name of external makefile project generator.
 CMAKE_EXTRA_GENERATOR:INTERNAL=
 //Name of generator.
@@ -590,7 +588,7 @@ CTEST_SUBMIT_RETRY_COUNT-ADVANCED:INTERNAL=1
 CTEST_SUBMIT_RETRY_DELAY-ADVANCED:INTERNAL=1
 DART_DEFINITIONS:INTERNAL=
 DART_INCLUDE_DIRS:INTERNAL=/usr/include
-DART_LIBRARIES:INTERNAL=dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart
+DART_LIBRARIES:INTERNAL=dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart
 //ADVANCED property for variable: DART_TESTING_TIMEOUT
 DART_TESTING_TIMEOUT-ADVANCED:INTERNAL=1
 DART_dart_DEFINITIONS:INTERNAL=
@@ -609,7 +607,7 @@ DART_utils-urdf_FOUND:INTERNAL=TRUE
 DART_utils-urdf_INCLUDE_DIRS:INTERNAL=
 DART_utils-urdf_LIBRARIES:INTERNAL=dart-utils-urdf
 //Details about finding DART
-FIND_PACKAGE_MESSAGE_DETAILS_DART:INTERNAL=[/usr/include][dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart][cfound components: utils-urdf gui-osg dart ][v(6.14)]
+FIND_PACKAGE_MESSAGE_DETAILS_DART:INTERNAL=[/usr/include][dart-utils-urdf;dart-gui-osg;dart;dart-utils-urdf;dart-gui-osg;dart][cfound components: utils-urdf gui-osg dart ][v(6.14)]
 //Details about finding PkgConfig
 FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/bin/pkg-config][v0.29.2()]
 //Details about finding Threads

@@ -199,7 +199,7 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
             IKflag = true;
             return true;
             }
-        else if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) >= 0.7){
+        else if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) >= 0.65){
             IKflag = false;
             std::cout << "static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize): " << static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) << std::endl;
             return false;
@@ -366,7 +366,7 @@ int main() {
     ProgramProcessMode_Continue = 1,
     ProgramProcessMode_Visualize = 2,
     };
-    ProgramProcessMode ProgramProcessMode = ProgramProcessMode_Continue;
+    ProgramProcessMode ProgramProcessMode = ProgramProcessMode_Visualize;
 
 
     Eigen::VectorXd jointTorqueLimits = Eigen::VectorXd(m1->getNumDofs()).setOnes(); // 可以手动修改关节力矩限制(修改时要注意joint数！)
@@ -450,7 +450,7 @@ int main() {
     octomap::Pointcloud pointCloud;
     pointCloud.clear();
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> colors; //这段代码定义了一个名为 colors 的 std::vector 容器，其元素类型为 Eigen::Vector4d，同时使用了 Eigen::aligned_allocator 来管理内存对齐。以下是详细解析。
-    for (auto it = tree.begin(), end = tree.end(); it != end; ++it) {
+    for (auto it = tree.begin_leafs(), end = tree.end_leafs(); it != end; ++it) {
         octomap::OcTreeNode* node = &(*it);
         //std::cout << "pcl node->getOccupancy(): " << node->getOccupancy() << std::endl;
         
@@ -510,9 +510,12 @@ int main() {
     viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
     viewer->setCameraManipulator(viewer->getCameraManipulator());
 
-    tree.writeBinary(treefilePath);
-    std::cout << "save tree.writeBinary success" << std::endl;
-    SaveLoadNewVisitPointCount.saveNewVisitPointCount(NewvisitPointCount);
+    // viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
+    // viewer->setCameraManipulator(viewer->getCameraManipulator());
+
+    // tree.writeBinary(treefilePath);
+    // std::cout << "save tree.writeBinary success" << std::endl;
+    // SaveLoadNewVisitPointCount.saveNewVisitPointCount(NewvisitPointCount);
 
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time);  // 计算时间差

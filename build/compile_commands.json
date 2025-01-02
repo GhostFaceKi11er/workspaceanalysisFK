@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/haitaoxu/workspaceanalysis/build/workspaceanalysis",
+  "command": "/usr/bin/c++ -DDART_ACTIVE_LOG_LEVEL=2 -DDART_HAVE_spdlog=1 -DFMT_HEADER_ONLY=1 -DFMT_LOCALE -DFMT_SHARED -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS -DSPDLOG_FMT_EXTERNAL -DWorkSpaceAnalysis_EXPORTS -I/home/haitaoxu/workspaceanalysis/workspaceanalysis -isystem /usr/include/eigen3  -fPIC -fPIC -O3 -DNDEBUG -fPIC -o CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o -c /home/haitaoxu/workspaceanalysis/workspaceanalysis/SpaceSampler.cpp",
+  "file": "/home/haitaoxu/workspaceanalysis/workspaceanalysis/SpaceSampler.cpp"
+},
+{
+  "directory": "/home/haitaoxu/workspaceanalysis/build/examples",
+  "command": "/usr/bin/c++ -DDART_ACTIVE_LOG_LEVEL=2 -DDART_HAVE_spdlog=1 -DFMT_HEADER_ONLY=1 -DFMT_LOCALE -DFMT_SHARED -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS -DSPDLOG_FMT_EXTERNAL -I/home/haitaoxu/workspaceanalysis/workspaceanalysis -isystem /usr/include/eigen3  -fPIC -O3 -DNDEBUG -o CMakeFiles/main.dir/main.cpp.o -c /home/haitaoxu/workspaceanalysis/examples/main.cpp",
+  "file": "/home/haitaoxu/workspaceanalysis/examples/main.cpp"
+}
+]
