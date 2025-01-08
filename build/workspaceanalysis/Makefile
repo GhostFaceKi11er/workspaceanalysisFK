@@ -185,6 +185,78 @@ WorkSpaceAnalysis/fast:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build
 .PHONY : WorkSpaceAnalysis/fast
 
+Analyzer.o: Analyzer.cpp.o
+.PHONY : Analyzer.o
+
+# target to build an object file
+Analyzer.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o
+.PHONY : Analyzer.cpp.o
+
+Analyzer.i: Analyzer.cpp.i
+.PHONY : Analyzer.i
+
+# target to preprocess a source file
+Analyzer.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.i
+.PHONY : Analyzer.cpp.i
+
+Analyzer.s: Analyzer.cpp.s
+.PHONY : Analyzer.s
+
+# target to generate assembly for a file
+Analyzer.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.s
+.PHONY : Analyzer.cpp.s
+
+Checker.o: Checker.cpp.o
+.PHONY : Checker.o
+
+# target to build an object file
+Checker.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o
+.PHONY : Checker.cpp.o
+
+Checker.i: Checker.cpp.i
+.PHONY : Checker.i
+
+# target to preprocess a source file
+Checker.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.i
+.PHONY : Checker.cpp.i
+
+Checker.s: Checker.cpp.s
+.PHONY : Checker.s
+
+# target to generate assembly for a file
+Checker.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.s
+.PHONY : Checker.cpp.s
+
+CtrlC.o: CtrlC.cpp.o
+.PHONY : CtrlC.o
+
+# target to build an object file
+CtrlC.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o
+.PHONY : CtrlC.cpp.o
+
+CtrlC.i: CtrlC.cpp.i
+.PHONY : CtrlC.i
+
+# target to preprocess a source file
+CtrlC.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.i
+.PHONY : CtrlC.cpp.i
+
+CtrlC.s: CtrlC.cpp.s
+.PHONY : CtrlC.s
+
+# target to generate assembly for a file
+CtrlC.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.s
+.PHONY : CtrlC.cpp.s
+
 SpaceSampler.o: SpaceSampler.cpp.o
 .PHONY : SpaceSampler.o
 
@@ -209,6 +281,30 @@ SpaceSampler.cpp.s:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.s
 .PHONY : SpaceSampler.cpp.s
 
+robot/RobotSystem.o: robot/RobotSystem.cpp.o
+.PHONY : robot/RobotSystem.o
+
+# target to build an object file
+robot/RobotSystem.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o
+.PHONY : robot/RobotSystem.cpp.o
+
+robot/RobotSystem.i: robot/RobotSystem.cpp.i
+.PHONY : robot/RobotSystem.i
+
+# target to preprocess a source file
+robot/RobotSystem.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.i
+.PHONY : robot/RobotSystem.cpp.i
+
+robot/RobotSystem.s: robot/RobotSystem.cpp.s
+.PHONY : robot/RobotSystem.s
+
+# target to generate assembly for a file
+robot/RobotSystem.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.s
+.PHONY : robot/RobotSystem.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -223,9 +319,21 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... WorkSpaceAnalysis"
+	@echo "... Analyzer.o"
+	@echo "... Analyzer.i"
+	@echo "... Analyzer.s"
+	@echo "... Checker.o"
+	@echo "... Checker.i"
+	@echo "... Checker.s"
+	@echo "... CtrlC.o"
+	@echo "... CtrlC.i"
+	@echo "... CtrlC.s"
 	@echo "... SpaceSampler.o"
 	@echo "... SpaceSampler.i"
 	@echo "... SpaceSampler.s"
+	@echo "... robot/RobotSystem.o"
+	@echo "... robot/RobotSystem.i"
+	@echo "... robot/RobotSystem.s"
 .PHONY : help
 
 

@@ -1,3 +1,4 @@
+#pragma once
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <random>
@@ -22,6 +23,8 @@ public:
     void Discretize3DSpace(Eigen::Vector6d boundaries, double resolution, std::vector<Eigen::Vector3d>& samplePoints);
 
     std::vector<Eigen::Vector3d> get3dBoundaryPoints(double resolution, std::vector<double>& samplebound);
+
+    std::vector<Eigen::Vector3d> get2dBoundaryPoints(double resolution, std::vector<double>& samplebound);
 
 private:
 };

@@ -561,6 +561,32 @@ main/fast:
 	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+#=============================================================================
+# Target rules for targets named testload_m1_ws
+
+# Build rule for target.
+testload_m1_ws: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 testload_m1_ws
+.PHONY : testload_m1_ws
+
+# fast build rule for target.
+testload_m1_ws/fast:
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/build
+.PHONY : testload_m1_ws/fast
+
+#=============================================================================
+# Target rules for targets named visualize
+
+# Build rule for target.
+visualize: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 visualize
+.PHONY : visualize
+
+# fast build rule for target.
+visualize/fast:
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/build
+.PHONY : visualize/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -604,6 +630,8 @@ help:
 	@echo "... NightlyUpdate"
 	@echo "... WorkSpaceAnalysis"
 	@echo "... main"
+	@echo "... testload_m1_ws"
+	@echo "... visualize"
 .PHONY : help
 
 

@@ -1221,5 +1221,48 @@ examples/CMakeFiles/main.dir/main.cpp.o: \
  /usr/include/dart/gui/osg/render/SphereShapeNode.hpp \
  /usr/include/dart/gui/osg/render/VoxelGridShapeNode.hpp \
  /usr/include/dart/gui/osg/render/WarningShapeNode.hpp \
+ /usr/include/osgGA/TrackballManipulator \
  /home/haitaoxu/workspaceanalysis/workspaceanalysis/SpaceSampler.h \
- /usr/include/osgGA/TrackballManipulator
+ /home/haitaoxu/workspaceanalysis/workspaceanalysis/Analyzer.h \
+ /home/haitaoxu/workspaceanalysis/workspaceanalysis/robot/RobotSystem.h \
+ /usr/include/dart/utils/urdf/urdf.hpp \
+ /usr/include/dart/utils/urdf/IncludeUrdf.hpp \
+ /usr/include/urdf_model/model.h /usr/include/urdf_model/link.h \
+ /usr/include/urdf_model/joint.h /usr/include/urdf_model/pose.h \
+ /usr/include/urdf_exception/exception.h /usr/include/urdf_model/utils.h \
+ /usr/include/urdf_model/types.h /usr/include/urdf_model/color.h \
+ /usr/include/urdf_model/types.h /usr/include/urdf_model/twist.h \
+ /usr/include/urdf_parser/urdf_parser.h /usr/include/tinyxml.h \
+ /usr/include/urdf_model/color.h \
+ /usr/include/urdf_model_state/model_state.h \
+ /usr/include/urdf_model_state/types.h /usr/include/urdf_sensor/sensor.h \
+ /usr/include/urdf_model/joint.h /usr/include/urdf_sensor/types.h \
+ /usr/include/urdf_world/types.h /usr/include/urdf_parser/exportdecl.h \
+ /usr/include/urdf_world/world.h \
+ /usr/include/dart/utils/urdf/urdf_world_parser.hpp \
+ /usr/include/dart/utils/urdf/BackwardCompatibility.hpp \
+ /home/haitaoxu/workspaceanalysis/workspaceanalysis/utils/Types.hpp \
+ /home/haitaoxu/workspaceanalysis/workspaceanalysis/Checker.h \
+ /usr/include/c++/11/csignal /usr/include/signal.h \
+ /usr/include/x86_64-linux-gnu/bits/signum-generic.h \
+ /usr/include/x86_64-linux-gnu/bits/signum-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sig_atomic_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h \
+ /usr/include/x86_64-linux-gnu/bits/siginfo-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/siginfo-consts.h \
+ /usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sigval_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h \
+ /usr/include/x86_64-linux-gnu/bits/sigevent-consts.h \
+ /usr/include/x86_64-linux-gnu/bits/sigaction.h \
+ /usr/include/x86_64-linux-gnu/bits/sigcontext.h \
+ /usr/include/x86_64-linux-gnu/bits/types/stack_t.h \
+ /usr/include/x86_64-linux-gnu/sys/ucontext.h \
+ /usr/include/x86_64-linux-gnu/bits/sigstack.h \
+ /usr/include/x86_64-linux-gnu/bits/sigstksz.h \
+ /usr/include/x86_64-linux-gnu/bits/ss_flags.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h \
+ /usr/include/x86_64-linux-gnu/bits/sigthread.h \
+ /usr/include/x86_64-linux-gnu/bits/signal_ext.h \
+ /home/haitaoxu/workspaceanalysis/workspaceanalysis/CtrlC.h

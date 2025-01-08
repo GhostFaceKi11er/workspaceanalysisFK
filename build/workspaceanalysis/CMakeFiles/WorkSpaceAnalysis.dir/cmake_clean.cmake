@@ -1,6 +1,14 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o"
+  "CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o.d"
+  "CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o"
+  "CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o.d"
+  "CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o"
+  "CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o.d"
   "CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o"
   "CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o.d"
+  "CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o"
+  "CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o.d"
   "libWorkSpaceAnalysis.pdb"
   "libWorkSpaceAnalysis.so"
 )

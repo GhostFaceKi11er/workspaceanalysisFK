@@ -185,6 +185,34 @@ main/fast:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+# Convenience name for target.
+examples/CMakeFiles/testload_m1_ws.dir/rule:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/testload_m1_ws.dir/rule
+.PHONY : examples/CMakeFiles/testload_m1_ws.dir/rule
+
+# Convenience name for target.
+testload_m1_ws: examples/CMakeFiles/testload_m1_ws.dir/rule
+.PHONY : testload_m1_ws
+
+# fast build rule for target.
+testload_m1_ws/fast:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/build
+.PHONY : testload_m1_ws/fast
+
+# Convenience name for target.
+examples/CMakeFiles/visualize.dir/rule:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/visualize.dir/rule
+.PHONY : examples/CMakeFiles/visualize.dir/rule
+
+# Convenience name for target.
+visualize: examples/CMakeFiles/visualize.dir/rule
+.PHONY : visualize
+
+# fast build rule for target.
+visualize/fast:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/build
+.PHONY : visualize/fast
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -209,6 +237,54 @@ main.cpp.s:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+testload_m1_ws.o: testload_m1_ws.cpp.o
+.PHONY : testload_m1_ws.o
+
+# target to build an object file
+testload_m1_ws.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/testload_m1_ws.cpp.o
+.PHONY : testload_m1_ws.cpp.o
+
+testload_m1_ws.i: testload_m1_ws.cpp.i
+.PHONY : testload_m1_ws.i
+
+# target to preprocess a source file
+testload_m1_ws.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/testload_m1_ws.cpp.i
+.PHONY : testload_m1_ws.cpp.i
+
+testload_m1_ws.s: testload_m1_ws.cpp.s
+.PHONY : testload_m1_ws.s
+
+# target to generate assembly for a file
+testload_m1_ws.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/testload_m1_ws.cpp.s
+.PHONY : testload_m1_ws.cpp.s
+
+visualize.o: visualize.cpp.o
+.PHONY : visualize.o
+
+# target to build an object file
+visualize.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/visualize.cpp.o
+.PHONY : visualize.cpp.o
+
+visualize.i: visualize.cpp.i
+.PHONY : visualize.i
+
+# target to preprocess a source file
+visualize.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/visualize.cpp.i
+.PHONY : visualize.cpp.i
+
+visualize.s: visualize.cpp.s
+.PHONY : visualize.s
+
+# target to generate assembly for a file
+visualize.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/visualize.cpp.s
+.PHONY : visualize.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -223,9 +299,17 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... main"
+	@echo "... testload_m1_ws"
+	@echo "... visualize"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... testload_m1_ws.o"
+	@echo "... testload_m1_ws.i"
+	@echo "... testload_m1_ws.s"
+	@echo "... visualize.o"
+	@echo "... visualize.i"
+	@echo "... visualize.s"
 .PHONY : help
 
 

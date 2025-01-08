@@ -42,6 +42,8 @@
 /home/haitaoxu/workspaceanalysis/build/workspaceanalysis/CMakeFiles/install/local.dir
 /home/haitaoxu/workspaceanalysis/build/workspaceanalysis/CMakeFiles/install/strip.dir
 /home/haitaoxu/workspaceanalysis/build/examples/CMakeFiles/main.dir
+/home/haitaoxu/workspaceanalysis/build/examples/CMakeFiles/testload_m1_ws.dir
+/home/haitaoxu/workspaceanalysis/build/examples/CMakeFiles/visualize.dir
 /home/haitaoxu/workspaceanalysis/build/examples/CMakeFiles/test.dir
 /home/haitaoxu/workspaceanalysis/build/examples/CMakeFiles/edit_cache.dir
 /home/haitaoxu/workspaceanalysis/build/examples/CMakeFiles/rebuild_cache.dir

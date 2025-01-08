@@ -11,12 +11,18 @@
 #include <random>
 #include <vector>
 #include <dart/gui/osg/osg.hpp>
-#include "SpaceSampler.h"
 #include <osgGA/TrackballManipulator>
 #include <chrono>
 #include <filesystem> 
+#include "SpaceSampler.h"
+#include "Analyzer.h"
+#include <robot/RobotSystem.h>
+#include <ctime>
+#include <csignal>
+#include <CtrlC.h>
 //#include <octovis/octovis.h>
 // 修正类定义
+
 class SaveLoadNewVisitPointCount{
 public:
     SaveLoadNewVisitPointCount( const std::string& filename):  m_filename(filename) {}
@@ -48,49 +54,47 @@ public:
         std::string m_filename;
 };
 
-class SampleOcTree {
+class CollisionDetector{
 public:
-    SampleOcTree(const std::vector<double>& samplebound) 
-        : m_tree(0.01) { // 初始化 m_tree，指定分辨率
-        for (double x = samplebound[0]; x <= samplebound[1]; x += 0.01) {
-            for (double y = samplebound[2]; y <= samplebound[3]; y += 0.01) {
-                for (double z = samplebound[4]; z <= samplebound[5]; z += 0.01) {
-                    m_tree.updateNode(octomap::point3d(x, y, z), false);
-                }
+    CollisionDetector(dart::dynamics::SkeletonPtr& m1, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits): m_m1(m1), m_world(world), m_jointTorqueLimits(jointTorqueLimits) {}
+
+    bool checkCollision(){
+        auto collisionDetector = m_world->getConstraintSolver()->getCollisionDetector(); // 检测自碰撞    
+        auto collisionGroup = collisionDetector->createCollisionGroup(m_m1.get()); //创建一个碰撞组（CollisionGroup），包含机器人所有的碰撞几何体
+        dart::collision::CollisionOption option;  //碰撞检测选项（如是否需要详细结果）
+        dart::collision::CollisionResult result;  //碰撞检测结果（如发生碰撞的物体对、碰撞点等）。
+
+        bool inCollision = collisionGroup->collide(option, &result);
+        if (inCollision) return true; 
+        else return false;
+        }
+
+    bool checkJointTorque() {
+        // 逆动力学计算每个关节的力矩
+        m_m1->computeInverseDynamics();
+        Eigen::VectorXd jointForces = m_m1->getForces();
+        // std::cout << "\n### current jointForces: \n" << jointForces.transpose() << std::endl;
+        for (int i = 0; i < jointForces.size(); ++i) {
+            if (jointForces[i] > m_jointTorqueLimits[i] || jointForces[i] < -m_jointTorqueLimits[i]) {
+                // std::cout << "joint " << i << " torque invalid!\n" << std::endl;
+                return true;
             }
         }
+        return false;
     }
 
-    octomap::OcTree m_tree; // 定义 m_tree 成员变量
+private:
+    dart::dynamics::SkeletonPtr m_m1;
+    dart::simulation::WorldPtr m_world; 
+    Eigen::VectorXd m_jointTorqueLimits;
 };
 
-
-bool checkCollision(dart::dynamics::SkeletonPtr& m1, dart::simulation::WorldPtr& world){
-    auto collisionDetector = world->getConstraintSolver()->getCollisionDetector(); // 检测自碰撞    
-    auto collisionGroup = collisionDetector->createCollisionGroup(m1.get()); //创建一个碰撞组（CollisionGroup），包含机器人所有的碰撞几何体
-    dart::collision::CollisionOption option;  //碰撞检测选项（如是否需要详细结果）
-    dart::collision::CollisionResult result;  //碰撞检测结果（如发生碰撞的物体对、碰撞点等）。
-
-    bool inCollision = collisionGroup->collide(option, &result);
-    if (inCollision) return true; 
-    else return false;
-}
-
-bool checkJointTorque(dart::dynamics::SkeletonPtr m1, Eigen::VectorXd& jointTorqueLimits) {
-    // 逆动力学计算每个关节的力矩
-    m1->computeInverseDynamics();
-    Eigen::VectorXd jointForces = m1->getForces();
-    // std::cout << "\n### current jointForces: \n" << jointForces.transpose() << std::endl;
-    for (int i = 0; i < jointForces.size(); ++i) {
-        if (jointForces[i] > jointTorqueLimits[i] || jointForces[i] < -jointTorqueLimits[i]) {
-            // std::cout << "joint " << i << " torque invalid!\n" << std::endl;
-            return true;
-        }
-    }
-    return false;
-}
-
-double generateRandom(double lower, double upper, double resolution) {
+class RandomJointsConfigs{
+public:
+    RandomJointsConfigs(const dart::dynamics::SkeletonPtr& m1, const int& singlechaindofs, Eigen::VectorXd& config, const int& revoluteJointCount): 
+    m_m1(m1), m_singlechaindofs(singlechaindofs), m_config(config), m_revoluteJointCount(revoluteJointCount) {}
+    
+    double generateRandom(double lower, double upper, double resolution) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(lower, upper);
@@ -98,17 +102,13 @@ double generateRandom(double lower, double upper, double resolution) {
     // 使用分辨率对随机数进行调整
     double randomValue = dis(gen);
     return std::round(randomValue / resolution) * resolution;
-}
-
-class RandomJointsConfigs{
-public:
-    RandomJointsConfigs(const dart::dynamics::SkeletonPtr& m1, const int& singlechaindofs, Eigen::VectorXd& config, const int& revoluteJointCount): 
-    m_m1(m1), m_singlechaindofs(singlechaindofs), m_config(config), m_revoluteJointCount(revoluteJointCount) {}
+    }
     
-    std::vector<int> getrevoluteJointIndex(){
+    //返回所有旋转关节的索引
+    std::vector<int> getrevoluteJointIndex(){ 
         std::vector<int> revoluteJointIndex;
         int jointCount = 0;
-        //std::cout << "m1->getNumDofs(): " << m1->getNumDofs() << std::endl;
+
         for (size_t i = 0; i < m_m1->getNumJoints(); ++i) { // 遍历单链关节
             auto joint = m_m1->getJoint(i);
             if (jointCount >= m_singlechaindofs) break;
@@ -120,11 +120,13 @@ public:
                 std::cout << "jointCount: " << jointCount << std::endl;
             } // 如果关节是旋转关节
         }
+
         std::cout << "revoluteJointIndex: " << revoluteJointIndex.size() << std::endl;
         return revoluteJointIndex;
     }
-
-    Eigen::VectorXd getConfig(std::vector<int> revoluteJointIndex){
+    
+    //对所有旋转关节进行随机采样，返回一组关节配置
+    Eigen::VectorXd getConfig(std::vector<int> revoluteJointIndex){ 
         int index = 0;
         for (auto i : revoluteJointIndex) { // 遍历单链关节
             auto joint = m_m1->getJoint(i);
@@ -140,6 +142,8 @@ public:
                 index++;
             }
         }
+
+    //将左臂的7个关节角配置复制给右臂，使得两个臂对称
     m_config.segment(m_singlechaindofs, m_revoluteJointCount-m_singlechaindofs) = m_config.segment(m_singlechaindofs-(m_revoluteJointCount-m_singlechaindofs), m_revoluteJointCount-m_singlechaindofs);
     //std::cout << "config: " << config.transpose() << std::endl;
     return m_config;
@@ -157,7 +161,7 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
     //int treeSize = tree.size();
 
     auto start_time = std::chrono::steady_clock::now();
-    auto interval_time = std::chrono::minutes(1);
+    auto interval_time = std::chrono::minutes(10);
     auto target_time = start_time + interval_time;
     while(true){
         auto current_time = std::chrono::steady_clock::now();
@@ -177,19 +181,20 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
 
         if (point.x() > samplebound[0] && point.x() < samplebound[1] && point.y() > samplebound[2] && point.y() < samplebound[3] && point.z() > samplebound[4] && point.z() < samplebound[5]){ // 判断点是否在有效范围内
             octomap::OcTreeNode* node = tree.search(point);
-            bool collisionFlag = checkCollision(m1, world);
-            bool jointTorqueFlag = checkJointTorque(m1, jointTorqueLimits);
+            CollisionDetector CollisionDetector(m1, world, jointTorqueLimits);
+            bool collisionFlag = CollisionDetector.checkCollision();
+            bool jointTorqueFlag = CollisionDetector.checkJointTorque();
             if (node == nullptr && !collisionFlag && !jointTorqueFlag) {
                 tree.updateNode(point, true);
                 NewvisitPointCount++;
             }
-            octomap::point3d mirrorpoint = point; // 对称点, 对称点在y轴上对称,右手能到的点,左手也能到
-            mirrorpoint.y() = -point.y();
-            octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
-            if (mirrornode == nullptr && !collisionFlag && !jointTorqueFlag) {
-                tree.updateNode(mirrorpoint, true);
-                NewvisitPointCount++;
-            }
+            // octomap::point3d mirrorpoint = point; // 对称点, 对称点在y轴上对称,右手能到的点,左手也能到
+            // mirrorpoint.y() = -point.y();
+            // octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
+            // if (mirrornode == nullptr && !collisionFlag && !jointTorqueFlag) {
+            //     tree.updateNode(mirrorpoint, true);
+            //     NewvisitPointCount++;
+            // }
         }
         totalPointCount++;
         //std::cout << "totalPointCount: " << totalPointCount << std::endl;
@@ -199,7 +204,7 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
             IKflag = true;
             return true;
             }
-        else if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) >= 0.65){
+        else if (totalPointCount%1000 == 0 && static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) >= 0.80){
             IKflag = false;
             std::cout << "static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize): " << static_cast<double>(NewvisitPointCount)/static_cast<double>(treeSize) << std::endl;
             return false;
@@ -239,8 +244,9 @@ public:
 
                     // 假设有一个函数 solveIK(targetPosition) 返回是否有解
                     bool hasSolution = solveIK();
-                    bool collisionFlag = checkCollision(m_m1, m_world);
-                    bool jointTorqueFlag = checkJointTorque(m_m1, m_jointTorqueLimits);
+                    CollisionDetector CollisionDetector(m_m1, m_world, m_jointTorqueLimits);
+                    bool collisionFlag = CollisionDetector.checkCollision();
+                    bool jointTorqueFlag = CollisionDetector.checkJointTorque();
 
                     if (hasSolution && !collisionFlag && !jointTorqueFlag) {
                         //it->setValue(1);
@@ -260,18 +266,6 @@ private:
     Eigen::VectorXd m_jointTorqueLimits;
     octomap::point3d m_point;
 };
-
-
-void convertToOctomapPointcloud(const std::vector<Eigen::Vector3d>& boundaryPoints, octomap::Pointcloud& octoCloud) {
-    octoCloud.clear(); // 清空 octomap::Pointcloud
-    
-    // 遍历 boundaryPoints，将每个 Eigen::Vector3d 转换为 octomap::point3d
-    for (const Eigen::Vector3d& point : boundaryPoints) {
-        // Eigen::Vector3d 转换为 octomap::point3d (x, y, z)
-        octomap::point3d octoPoint(point.x(), point.y(), point.z());
-        octoCloud.push_back(octoPoint);  // 将点添加到 octomap::Pointcloud
-    }
-}
 
 dart::dynamics::SimpleFramePtr createPointCloudFrame() {
     auto pointCloudShape = ::std::make_shared<::dart::dynamics::PointCloudShape>();
@@ -350,19 +344,19 @@ private:
 
 int main() {
     std::string treefilePath = "/home/haitaoxu/workspaceanalysis/M1_full.bt";
-
+    //std::string treefilePath = "/home/haitaoxu/workspaceanalysis/M1_full_load.bt";
     auto start_time = std::chrono::steady_clock::now();
-    auto interval_time = std::chrono::minutes(5);
 
     dart::simulation::WorldPtr world = dart::simulation::World::create();
     dart::utils::DartLoader urdf;
     dart::dynamics::SkeletonPtr m1 = urdf.parseSkeleton("/home/haitaoxu/workspaceanalysis/models/M1/M1_full.urdf");  // 加载 URDF 文件
+    //dart::dynamics::SkeletonPtr m1 = urdf.parseSkeleton("/home/haitaoxu/workspaceanalysis/models/M1/M1_full_load.urdf");  // 加载 URDF 文件
     world->addSkeleton(m1);
-    dart::dynamics::SkeletonPtr ground = urdf.parseSkeleton("/home/haitaoxu/workspaceanalysis/models/Environment/ground_terrain.urdf");
-    world->addSkeleton(ground);
+    // dart::dynamics::SkeletonPtr ground = urdf.parseSkeleton("/home/haitaoxu/workspaceanalysis/models/Environment/ground_terrain.urdf");
+    // world->addSkeleton(ground);
 
     enum ProgramProcessMode{
-    ProgramProcessMode_Initial = 0,
+    ProgramProcessMode_Initial = 0, //
     ProgramProcessMode_Continue = 1,
     ProgramProcessMode_Visualize = 2,
     };
@@ -374,17 +368,38 @@ int main() {
     
     double resolution = 0.01;
 
-    double x_min = 0.0, x_max = 1.8;
-    double y_min = -0.8, y_max = 0.8;
-    double z_min = 0.0, z_max = 1.8;
+
+
+    double x_min = -0.2, x_max = 2.0;
+    double y_min, y_max;
+    double z_min = 0.0, z_max = 2.0;
+
+    auto rh = m1->getBodyNode("rightHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
+    Eigen::Vector3d eePos = rh.translation();
+    y_min = eePos.y();
+    y_max = eePos.y();
+    // 设置负载物体中心位置的采样范围
+    // 10kg
+    // double x_min = 0.3;
+    // double x_max = 1.2;
+    // double z_min = 0.2;
+    // double z_max = 1.5;
+    // double y_min = -0.8;
+    // double y_max = 0.8;
+    // 25kg
+    //  double x_min = 0.0;
+    //  double x_max = 1.2;
+    //  double z_min = 0.0;
+    //  double z_max = 1.7;
+    //  double y_min = 0.0;
+    //  double y_max = 0.0;
     std::vector<double> samplebound = {x_min, x_max, y_min, y_max, z_min, z_max};
 
-    //SampleOcTree sampleOcTree(samplebound);
-    //octomap::OcTree tree_sample = sampleOcTree.m_tree; // 使用引用来访问 m_tree
-    //std::cout << "tree_sample.size():" << tree_sample.size() << std::endl; //这样离散初始化OcTree的大小远远小于真实值！！！！！！
-    SpaceSampler sampler;
+    //SpaceSampler sampler;
     std::vector<Eigen::Vector3d> samplePoints;
-    sampler.SpaceSampler::Discretize3DSpace(Eigen::Map<Eigen::Vector6d>(samplebound.data()), resolution, samplePoints); //这样才能得到正确的离散的所有点
+    auto SpaceSamplerPtr = std::make_shared<SpaceSampler>();
+    //sampler.SpaceSampler::Discretize3DSpace(Eigen::Map<Eigen::Vector6d>(samplebound.data()), resolution, samplePoints); //这样才能得到正确的离散的所有点
+    SpaceSamplerPtr->Discretize3DSpace(Eigen::Map<Eigen::Vector6d>(samplebound.data()), resolution, samplePoints); //这样才能得到正确的离散的所有点
     int samplePointsSize = samplePoints.size();
     std::cout << "samplePointsSize: " << samplePointsSize << std::endl;
     octomap::OcTree tree(0.01);
@@ -396,7 +411,7 @@ int main() {
     RandomJointsConfigs randomJointsConfigs(m1, singlechaindofs, config, revoluteJointCount);
     std::vector<int> revoluteJointIndex = randomJointsConfigs.getrevoluteJointIndex();
 
-    std::string filename = "/home/haitaoxu/workspaceanalysis/NewvisitPointCount.txt";
+    std::string filename = "/home/haitaoxu/workspaceanalysis/NewvisitPointCount_load.txt";
     SaveLoadNewVisitPointCount SaveLoadNewVisitPointCount(filename);
     int NewvisitPointCount = 0;
 
@@ -418,6 +433,20 @@ int main() {
         NewvisitPointCount = SaveLoadNewVisitPointCount.loadNewVisitPointCount();
         if (std::filesystem::exists(treefilePath)){ // 如果树文件存在，则读取树文件
             tree.readBinary(treefilePath);
+            
+            std::ifstream ifs("/home/haitaoxu/workspaceanalysis/NewvisitPointCount_load.txt");
+            if (ifs.is_open()) {
+                std::string line;
+                while (std::getline(ifs, line)) {
+                    if (line.find("NewvisitPointCount=") != std::string::npos) {
+                        NewvisitPointCount = std::stoi(line.substr(line.find('=') + 1));
+                    } 
+                }
+                std::cout << "Restored state. NewvisitPointCount: " << NewvisitPointCount << std::endl;
+            } else {
+                std::cout << "No previous state found. Starting fresh.\n";
+                NewvisitPointCount = 0;
+            }
 
             std::cout << "FK" << std::endl; // 计算正运动学
             double ratio = 6/100;
@@ -450,25 +479,29 @@ int main() {
     octomap::Pointcloud pointCloud;
     pointCloud.clear();
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> colors; //这段代码定义了一个名为 colors 的 std::vector 容器，其元素类型为 Eigen::Vector4d，同时使用了 Eigen::aligned_allocator 来管理内存对齐。以下是详细解析。
-    for (auto it = tree.begin_leafs(), end = tree.end_leafs(); it != end; ++it) {
-        octomap::OcTreeNode* node = &(*it);
+    for (auto positions:samplePoints) {
+        octomap::point3d point(positions[0], positions[1], positions[2]);
+        octomap::OcTreeNode* node = tree.search(point);
         //std::cout << "pcl node->getOccupancy(): " << node->getOccupancy() << std::endl;
-        
-        if (node->getOccupancy() >= 0.5) {
+        if (node != nullptr) {
+            if (node->getOccupancy() >= 0.5) {
             //std::cout << "it->getValue() == 1" << std::endl;
             //std::cout << "pcl node->getValue(): " << node->getValue() << std::endl;
-            octomap::point3d point = it.getCoordinate();
             pointCloud.push_back(point.x(), point.y(), point.z());
             colors.push_back({0, 0, 1, 0.5});
             //std::cout << "pcl pointCloud.size(): " << pointCloud.size() << std::endl;
+            }
         }
     }
+
     std::cout << "pcl pointCloud.size(): " << pointCloud.size() << std::endl;
+    std::cout << "Space sampled point size:"<< samplePointsSize << std::endl;
+    std::cout << "Valid Points in Space Ratio:"<< static_cast<double>(pointCloud.size())/static_cast<double>(samplePointsSize)*100 << "%" << std::endl;
     pointCloudShape->setVisualSize(resolution);
 
     // 添加工作区间的边界线
     //SpaceSampler sampler;
-    std::vector<Eigen::Vector3d> boundaryPoints = sampler.get3dBoundaryPoints(resolution, samplebound);
+    std::vector<Eigen::Vector3d> boundaryPoints = SpaceSamplerPtr->get2dBoundaryPoints(resolution, samplebound);
 
     for (auto point : boundaryPoints) {
         pointCloud.push_back(point.x(), point.y(), point.z());
@@ -506,12 +539,12 @@ int main() {
     float zAxisOffset = 0.9;
     ::osg::Vec3 up_xzView = ::osg::Vec3(0.0, 0.0, 1.0);
 
-    viewer->setCameraManipulator(new osgGA::TrackballManipulator());
-    viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
-    viewer->setCameraManipulator(viewer->getCameraManipulator());
-
+    // viewer->setCameraManipulator(new osgGA::TrackballManipulator());
     // viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
     // viewer->setCameraManipulator(viewer->getCameraManipulator());
+
+    viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
+    viewer->setCameraManipulator(viewer->getCameraManipulator());
 
     // tree.writeBinary(treefilePath);
     // std::cout << "save tree.writeBinary success" << std::endl;

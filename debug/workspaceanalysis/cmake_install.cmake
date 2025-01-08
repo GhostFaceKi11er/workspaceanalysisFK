@@ -71,14 +71,31 @@ endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/usr/local/include/Simulation/SpaceSampler.h")
+   "/usr/local/include/Simulation/Analyzer.h;/usr/local/include/Simulation/Checker.h;/usr/local/include/Simulation/CtrlC.h;/usr/local/include/Simulation/SpaceSampler.h")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/usr/local/include/Simulation" TYPE FILE FILES "/home/haitaoxu/workspaceanalysis/workspaceanalysis/SpaceSampler.h")
+  file(INSTALL DESTINATION "/usr/local/include/Simulation" TYPE FILE FILES
+    "/home/haitaoxu/workspaceanalysis/workspaceanalysis/Analyzer.h"
+    "/home/haitaoxu/workspaceanalysis/workspaceanalysis/Checker.h"
+    "/home/haitaoxu/workspaceanalysis/workspaceanalysis/CtrlC.h"
+    "/home/haitaoxu/workspaceanalysis/workspaceanalysis/SpaceSampler.h"
+    )
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
+   "/usr/local/include/Simulation/robot/RobotSystem.h")
+  if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
+    message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
+  endif()
+  if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
+    message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
+  endif()
+  file(INSTALL DESTINATION "/usr/local/include/Simulation/robot" TYPE FILE FILES "/home/haitaoxu/workspaceanalysis/workspaceanalysis/robot/RobotSystem.h")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)

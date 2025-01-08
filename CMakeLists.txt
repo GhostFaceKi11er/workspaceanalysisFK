@@ -28,21 +28,17 @@ find_package(DART 6.14 REQUIRED COMPONENTS utils-urdf gui-osg CONFIG)
 # 查找 OctoMap 库 
 #find_package(octomap REQUIRED)
 
-#find_package(octovis REQUIRED)
-
 # 设置包含目录
 include_directories(
     ${DART_INCLUDE_DIRS}       # DART 头文件路径
     /usr/include/eigen3        # Eigen 头文件路径
     ${OCTOMAP_INCLUDE_DIRS}    # OctoMap 头文件路径
-    #${OCTOVIS_INCLUDE_DIRS}    # Octovis 头文件路径
 )
 
 # 设置库文件路径
 link_directories(
     ${DART_LIBRARY_DIRS}       # DART 库文件路径
     /usr/lib/x86_64-linux-gnu  # OctoMap 库文件路径
-    #/usr/local/lib    # Octovis 库文件路径
 )
 
 
@@ -54,7 +50,6 @@ link_libraries(
     ccd                        # 碰撞检测库
     m                          # 数学库
     ${OCTOMAP_LIBRARIES}       # OctoMap 库
-    #${OCTOVIS_LIBRARIES}       # Octovis 库
 )
 
 add_subdirectory(workspaceanalysis)

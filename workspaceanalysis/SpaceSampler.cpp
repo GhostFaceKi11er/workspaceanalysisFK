@@ -25,6 +25,32 @@ void SpaceSampler::Discretize3DSpace(Eigen::Vector6d boundaries, double resoluti
     }
 }
 
+std::vector<Eigen::Vector3d> SpaceSampler::get2dBoundaryPoints(double resolution, std::vector<double>& samplebound){
+    std::vector<Eigen::Vector3d> boundaryPoints;
+    double x_min = samplebound[0];
+    double x_max = samplebound[1];
+    double y_min = samplebound[2];
+    double y_max = samplebound[3];
+    double z_min = samplebound[4];
+    double z_max = samplebound[5];
+
+    auto boudarySampler = std::make_shared<SpaceSampler>();
+    std::vector<double> xSamplePoints;
+    std::vector<double> zSamplePoints;
+    boudarySampler->Discretize1DSpace({x_min - resolution, x_max + resolution}, resolution, xSamplePoints);
+    boudarySampler->Discretize1DSpace({z_min - resolution, z_max + resolution}, resolution, zSamplePoints);
+    for (auto x : xSamplePoints) {
+        boundaryPoints.push_back(Eigen::Vector3d(x, y_min, z_min - resolution));
+        boundaryPoints.push_back(Eigen::Vector3d(x, y_min, z_max + resolution));
+    }
+    for (auto z : zSamplePoints) {
+        boundaryPoints.push_back(Eigen::Vector3d(x_min - resolution, y_min, z));
+        boundaryPoints.push_back(Eigen::Vector3d(x_max + resolution, y_min, z));
+    }
+
+    return boundaryPoints;
+}
+
 std::vector<Eigen::Vector3d> SpaceSampler::get3dBoundaryPoints(double resolution, std::vector<double>& samplebound){
     std::vector<Eigen::Vector3d> boundaryPoints;
     double x_min = samplebound[0];

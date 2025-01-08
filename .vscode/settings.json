@@ -147,7 +147,14 @@
         "stdvector": "cpp",
         "tensor": "cpp",
         "threadpool": "cpp",
-        "math": "cpp"
+        "math": "cpp",
+        "csignal": "cpp",
+        "linesegmentintersector": "cpp",
+        "image": "cpp",
+        "texture": "cpp",
+        "vertexarraystate": "cpp",
+        "buffered_value": "cpp",
+        "callback": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++-11"
 }

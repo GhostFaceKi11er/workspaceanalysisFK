@@ -514,7 +514,7 @@
 	</joint>
 	<link name="rightHandEE">
 		<inertial>
-			<mass value="5.0" />
+			<mass value="5.0"/>
 			<inertia ixx="0.001418" ixy="-0.00001" ixz="-0.000098" iyy="0.002781" iyz="-0.00023" izz="0.002407" />
 		</inertial>
 	</link>

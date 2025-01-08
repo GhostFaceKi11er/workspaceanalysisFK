@@ -69,10 +69,66 @@ include workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/progress.make
 # Include the compile flags for this target's objects.
 include workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/flags.make
 
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/flags.make
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o: ../workspaceanalysis/robot/RobotSystem.cpp
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o -MF CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o.d -o CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o -c /home/haitaoxu/workspaceanalysis/workspaceanalysis/robot/RobotSystem.cpp
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.i"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/haitaoxu/workspaceanalysis/workspaceanalysis/robot/RobotSystem.cpp > CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.i
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.s"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/haitaoxu/workspaceanalysis/workspaceanalysis/robot/RobotSystem.cpp -o CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.s
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/flags.make
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o: ../workspaceanalysis/Analyzer.cpp
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o -MF CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o.d -o CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o -c /home/haitaoxu/workspaceanalysis/workspaceanalysis/Analyzer.cpp
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.i"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/haitaoxu/workspaceanalysis/workspaceanalysis/Analyzer.cpp > CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.i
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.s"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/haitaoxu/workspaceanalysis/workspaceanalysis/Analyzer.cpp -o CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.s
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/flags.make
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o: ../workspaceanalysis/Checker.cpp
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o -MF CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o.d -o CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o -c /home/haitaoxu/workspaceanalysis/workspaceanalysis/Checker.cpp
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.i"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/haitaoxu/workspaceanalysis/workspaceanalysis/Checker.cpp > CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.i
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.s"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/haitaoxu/workspaceanalysis/workspaceanalysis/Checker.cpp -o CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.s
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/flags.make
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o: ../workspaceanalysis/CtrlC.cpp
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o -MF CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o.d -o CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o -c /home/haitaoxu/workspaceanalysis/workspaceanalysis/CtrlC.cpp
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.i"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/haitaoxu/workspaceanalysis/workspaceanalysis/CtrlC.cpp > CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.i
+
+workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.s"
+	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/haitaoxu/workspaceanalysis/workspaceanalysis/CtrlC.cpp -o CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.s
+
 workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/flags.make
 workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o: ../workspaceanalysis/SpaceSampler.cpp
 workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o"
 	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o -MF CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o.d -o CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o -c /home/haitaoxu/workspaceanalysis/workspaceanalysis/SpaceSampler.cpp
 
 workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.i: cmake_force
@@ -85,11 +141,19 @@ workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.s: cmake_for
 
 # Object files for target WorkSpaceAnalysis
 WorkSpaceAnalysis_OBJECTS = \
+"CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o" \
+"CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o" \
+"CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o" \
+"CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o" \
 "CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o"
 
 # External object files for target WorkSpaceAnalysis
 WorkSpaceAnalysis_EXTERNAL_OBJECTS =
 
+workspaceanalysis/libWorkSpaceAnalysis.so: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/robot/RobotSystem.cpp.o
+workspaceanalysis/libWorkSpaceAnalysis.so: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Analyzer.cpp.o
+workspaceanalysis/libWorkSpaceAnalysis.so: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/Checker.cpp.o
+workspaceanalysis/libWorkSpaceAnalysis.so: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/CtrlC.cpp.o
 workspaceanalysis/libWorkSpaceAnalysis.so: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/SpaceSampler.cpp.o
 workspaceanalysis/libWorkSpaceAnalysis.so: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/build.make
 workspaceanalysis/libWorkSpaceAnalysis.so: /usr/lib/x86_64-linux-gnu/libdart-utils-urdf.so.6.14.4
@@ -130,7 +194,7 @@ workspaceanalysis/libWorkSpaceAnalysis.so: /usr/lib/x86_64-linux-gnu/libdart-ext
 workspaceanalysis/libWorkSpaceAnalysis.so: /usr/lib/x86_64-linux-gnu/libGLX.so
 workspaceanalysis/libWorkSpaceAnalysis.so: /usr/lib/x86_64-linux-gnu/libOpenGL.so
 workspaceanalysis/libWorkSpaceAnalysis.so: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library libWorkSpaceAnalysis.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX shared library libWorkSpaceAnalysis.so"
 	cd /home/haitaoxu/workspaceanalysis/build/workspaceanalysis && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/WorkSpaceAnalysis.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
