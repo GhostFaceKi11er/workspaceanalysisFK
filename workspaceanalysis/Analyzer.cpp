@@ -130,39 +130,40 @@ void WorkspaceAnalyzer::AnalyzeCartSpace(EEndEffectorType& endEffectorType, Eige
         return;
     }
 
-    Eigen::Isometry3d pointTf;
+    Eigen::Isometry3d rightHandTf;
+    Eigen::Isometry3d leftHandTf;
     Eigen::VectorXd jointPos;
     
     bool bTorque;
-
     int countvalidCartPoints = 0;
-
-    //auto rh = m_robot->GetSkeleton()->getBodyNode("rightHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
-    //std::cout<<  "end-effector position:"<< rh.translation() <<"  "<< std::endl;
-
-    //signal(SIGINT, WorkspaceAnalyzer::signalHandler); 
-    auto rightHand = WorkSpaceAnalysis::EEndEffectorType::RIGHTHAND;
-    auto leftHand = WorkSpaceAnalysis::EEndEffectorType::LEFTHAND;
-
+    int count = 0;
     int countangle = 0;
+
     for (auto point:sampledPositions) {
         octomap::point3d m_point(point[0], point[1], point[2]);
+        std::cout << "count/sampledPositions:" << count << "/" << sampledPositions.size()<< std::endl;
+        std::cout << "countvalidCartPoints/sampledPositions:" << countvalidCartPoints << "/" << sampledPositions.size()<< std::endl;
         if (CtrlC::tree.search(m_point) == nullptr){
-            pointTf.translation() = point;
+            rightHandTf.translation() = point;
+            Eigen::Vector3d mirrorPoint = {point[0], -point[1], point[2]};
+            leftHandTf.translation() = mirrorPoint;
+            rightHandTf.translation()[1] = -0.15;
+            leftHandTf.translation()[1] = 0.15;
+        
             if (countangle==sampledAngles.size()) countangle = 0;
+            
             for (countangle; countangle<sampledAngles.size(); ++countangle) {
                 auto angle = sampledAngles[countangle];
-                pointTf.linear() = initPose * Eigen::AngleAxisd(angle, axis).toRotationMatrix();
-
-                    std::vector<std::pair<EEndEffectorType, Eigen::Isometry3d>> eePoses = {
-                    {rightHand, pointTf},
-                    {leftHand, pointTf}
-                    };
+                
                 // 最新手部坐标系y轴均朝内，所以将离散的角度加到y轴旋转
+                rightHandTf.linear() *= Eigen::AngleAxisd(angle, axis).toRotationMatrix();
+                leftHandTf.linear() = rightHandTf.linear() * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
+
+                std::vector<std::pair<WorkSpaceAnalysis::EEndEffectorType, Eigen::Isometry3d>> eePoses = { 
+                {WorkSpaceAnalysis::EEndEffectorType::RIGHTHAND, rightHandTf}, {WorkSpaceAnalysis::EEndEffectorType::LEFTHAND, leftHandTf}};//对两个手的末端执行器都求逆解
                 if (m_robot->InverseKinematics(eePoses, jointPos, true, true) == 0){
                     bTorque = m_checker->CheckJointTorque();
                     if (bTorque) {
-                        // octomap::point3d m_point(point[0], point[1], point[2]);
                         CtrlC::tree.updateNode(m_point, true);
                         countvalidCartPoints++;
                         CtrlC::NewvisitPointCount++;
@@ -173,6 +174,7 @@ void WorkspaceAnalyzer::AnalyzeCartSpace(EEndEffectorType& endEffectorType, Eige
             }
         }
     }
+    count++;
     }
 }
 

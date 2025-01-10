@@ -1,0 +1,78 @@
+treefilePath not exists
+No previous state found. Starting fresh.
+samplePointsSize: 27
+samplePoints[i]: 0.4  -0 0.5
+samplePoints[i]:  0.4   -0 0.55
+samplePoints[i]: 0.4  -0 0.6
+samplePoints[i]:  0.4 0.05  0.5
+samplePoints[i]:  0.4 0.05 0.55
+samplePoints[i]:  0.4 0.05  0.6
+samplePoints[i]: 0.4 0.1 0.5
+samplePoints[i]:  0.4  0.1 0.55
+samplePoints[i]: 0.4 0.1 0.6
+samplePoints[i]: 0.45   -0  0.5
+samplePoints[i]: 0.45   -0 0.55
+samplePoints[i]: 0.45   -0  0.6
+samplePoints[i]: 0.45 0.05  0.5
+samplePoints[i]: 0.45 0.05 0.55
+samplePoints[i]: 0.45 0.05  0.6
+samplePoints[i]: 0.45  0.1  0.5
+samplePoints[i]: 0.45  0.1 0.55
+samplePoints[i]: 0.45  0.1  0.6
+samplePoints[i]: 0.5  -0 0.5
+samplePoints[i]:  0.5   -0 0.55
+samplePoints[i]: 0.5  -0 0.6
+samplePoints[i]:  0.5 0.05  0.5
+samplePoints[i]:  0.5 0.05 0.55
+samplePoints[i]:  0.5 0.05  0.6
+samplePoints[i]: 0.5 0.1 0.5
+samplePoints[i]:  0.5  0.1 0.55
+samplePoints[i]: 0.5 0.1 0.6
+revoluteJoint: legJoint2
+jointCount: 1
+revoluteJoint: legJoint3
+jointCount: 2
+revoluteJoint: torsoJoint
+jointCount: 3
+revoluteJoint: headJoint1
+jointCount: 4
+revoluteJoint: leftArmJoint1
+jointCount: 5
+revoluteJoint: leftArmJoint2
+jointCount: 6
+revoluteJoint: leftArmJoint3
+jointCount: 7
+revoluteJoint: leftArmJoint4
+jointCount: 8
+revoluteJoint: leftArmJoint5
+jointCount: 9
+revoluteJoint: leftArmJoint6
+jointCount: 10
+revoluteJoint: leftArmJoint7
+jointCount: 11
+revoluteJointIndex: 11
+ProgramProcessMode_Process
+treefilePath not exists
+IK
+NewvisitPointCount: 0
+i: 4 NewvisitPointCount: 1 newpointcount:1 duration: 59999 point: (0.4 0.05 0.55)
+i: 20 NewvisitPointCount: 2 newpointcount:2 duration: 59999 point: (0.5 -0 0.6)
+i: 23 NewvisitPointCount: 3 newpointcount:3 duration: 59999 point: (0.5 0.05 0.6)
+i: 2 NewvisitPointCount: 4 newpointcount:4 duration: 59809 point: (0.4 -0 0.6)
+i: 3 NewvisitPointCount: 5 newpointcount:5 duration: 59809 point: (0.4 0.05 0.5)
+i: 14 NewvisitPointCount: 6 newpointcount:6 duration: 59809 point: (0.45 0.05 0.6)
+i: 18 NewvisitPointCount: 7 newpointcount:7 duration: 59809 point: (0.5 -0 0.5)
+i: 15 NewvisitPointCount: 8 newpointcount:8 duration: 59622 point: (0.45 0.1 0.5)
+i: 16 NewvisitPointCount: 9 newpointcount:9 duration: 59622 point: (0.45 0.1 0.55)
+i: 19 NewvisitPointCount: 10 newpointcount:10 duration: 59622 point: (0.5 -0 0.55)
+i: 21 NewvisitPointCount: 11 newpointcount:11 duration: 59426 point: (0.5 0.05 0.5)
+i: 1 NewvisitPointCount: 12 newpointcount:12 duration: 59211 point: (0.4 -0 0.55)
+i: 8 NewvisitPointCount: 13 newpointcount:13 duration: 58795 point: (0.4 0.1 0.6)
+i: 24 NewvisitPointCount: 14 newpointcount:14 duration: 58595 point: (0.5 0.1 0.5)
+i: 25 NewvisitPointCount: 15 newpointcount:15 duration: 58595 point: (0.5 0.1 0.55)
+i: 9 NewvisitPointCount: 16 newpointcount:16 duration: 58170 point: (0.45 -0 0.5)
+i: 22 NewvisitPointCount: 17 newpointcount:17 duration: 57956 point: (0.5 0.05 0.55)
+i: 26 NewvisitPointCount: 18 newpointcount:18 duration: 57539 point: (0.5 0.1 0.6)
+Caught signal, exiting program...
+NewvisitPointCount=18
+State saved.

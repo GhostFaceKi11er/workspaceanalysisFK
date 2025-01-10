@@ -109,8 +109,8 @@ clean: examples/clean
 # Directory level rules for directory examples
 
 # Recursive "all" directory target.
-examples/all: examples/CMakeFiles/main.dir/all
-examples/all: examples/CMakeFiles/testload_m1_ws.dir/all
+examples/all: examples/CMakeFiles/ws_m1.dir/all
+examples/all: examples/CMakeFiles/ws_m1_load.dir/all
 examples/all: examples/CMakeFiles/visualize.dir/all
 .PHONY : examples/all
 
@@ -119,8 +119,8 @@ examples/preinstall:
 .PHONY : examples/preinstall
 
 # Recursive "clean" directory target.
-examples/clean: examples/CMakeFiles/main.dir/clean
-examples/clean: examples/CMakeFiles/testload_m1_ws.dir/clean
+examples/clean: examples/CMakeFiles/ws_m1.dir/clean
+examples/clean: examples/CMakeFiles/ws_m1_load.dir/clean
 examples/clean: examples/CMakeFiles/visualize.dir/clean
 .PHONY : examples/clean
 
@@ -894,56 +894,56 @@ workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/clean:
 .PHONY : workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/clean
 
 #=============================================================================
-# Target rules for target examples/CMakeFiles/main.dir
+# Target rules for target examples/CMakeFiles/ws_m1.dir
 
 # All Build rule for target.
-examples/CMakeFiles/main.dir/all: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/all
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/depend
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=7,8 "Built target main"
-.PHONY : examples/CMakeFiles/main.dir/all
+examples/CMakeFiles/ws_m1.dir/all: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/all
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/depend
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=9,10 "Built target ws_m1"
+.PHONY : examples/CMakeFiles/ws_m1.dir/all
 
 # Build rule for subdir invocation for target.
-examples/CMakeFiles/main.dir/rule: cmake_check_build_system
+examples/CMakeFiles/ws_m1.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/haitaoxu/workspaceanalysis/build/CMakeFiles 8
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/main.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/ws_m1.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/haitaoxu/workspaceanalysis/build/CMakeFiles 0
-.PHONY : examples/CMakeFiles/main.dir/rule
+.PHONY : examples/CMakeFiles/ws_m1.dir/rule
 
 # Convenience name for target.
-main: examples/CMakeFiles/main.dir/rule
-.PHONY : main
+ws_m1: examples/CMakeFiles/ws_m1.dir/rule
+.PHONY : ws_m1
 
 # clean rule for target.
-examples/CMakeFiles/main.dir/clean:
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/clean
-.PHONY : examples/CMakeFiles/main.dir/clean
+examples/CMakeFiles/ws_m1.dir/clean:
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/clean
+.PHONY : examples/CMakeFiles/ws_m1.dir/clean
 
 #=============================================================================
-# Target rules for target examples/CMakeFiles/testload_m1_ws.dir
+# Target rules for target examples/CMakeFiles/ws_m1_load.dir
 
 # All Build rule for target.
-examples/CMakeFiles/testload_m1_ws.dir/all: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/all
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/depend
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=9,10 "Built target testload_m1_ws"
-.PHONY : examples/CMakeFiles/testload_m1_ws.dir/all
+examples/CMakeFiles/ws_m1_load.dir/all: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/all
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/depend
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=11,12 "Built target ws_m1_load"
+.PHONY : examples/CMakeFiles/ws_m1_load.dir/all
 
 # Build rule for subdir invocation for target.
-examples/CMakeFiles/testload_m1_ws.dir/rule: cmake_check_build_system
+examples/CMakeFiles/ws_m1_load.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/haitaoxu/workspaceanalysis/build/CMakeFiles 8
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/testload_m1_ws.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/ws_m1_load.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/haitaoxu/workspaceanalysis/build/CMakeFiles 0
-.PHONY : examples/CMakeFiles/testload_m1_ws.dir/rule
+.PHONY : examples/CMakeFiles/ws_m1_load.dir/rule
 
 # Convenience name for target.
-testload_m1_ws: examples/CMakeFiles/testload_m1_ws.dir/rule
-.PHONY : testload_m1_ws
+ws_m1_load: examples/CMakeFiles/ws_m1_load.dir/rule
+.PHONY : ws_m1_load
 
 # clean rule for target.
-examples/CMakeFiles/testload_m1_ws.dir/clean:
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/clean
-.PHONY : examples/CMakeFiles/testload_m1_ws.dir/clean
+examples/CMakeFiles/ws_m1_load.dir/clean:
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/clean
+.PHONY : examples/CMakeFiles/ws_m1_load.dir/clean
 
 #=============================================================================
 # Target rules for target examples/CMakeFiles/visualize.dir
@@ -952,7 +952,7 @@ examples/CMakeFiles/testload_m1_ws.dir/clean:
 examples/CMakeFiles/visualize.dir/all: workspaceanalysis/CMakeFiles/WorkSpaceAnalysis.dir/all
 	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/depend
 	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=11,12 "Built target visualize"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/haitaoxu/workspaceanalysis/build/CMakeFiles --progress-num=7,8 "Built target visualize"
 .PHONY : examples/CMakeFiles/visualize.dir/all
 
 # Build rule for subdir invocation for target.

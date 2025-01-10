@@ -158,7 +158,7 @@ void RobotSystem::UpdateSystem(const Eigen::VectorXd& jointPos, const Eigen::Vec
     if (ifUpdateDynamics) m_skel->computeForwardDynamics();
 }
 
-int RobotSystem::InverseKinematics(EEndEffectorType type, Eigen::Isometry3d& pose, Eigen::VectorXd& jointPos, //需要抽象
+int RobotSystem::InverseKinematics(EEndEffectorType type, Eigen::Isometry3d& pose, Eigen::VectorXd& jointPos,
                                    bool ifUseWholeBody, bool ifApply) {
     std::shared_ptr<dart::dynamics::InverseKinematics> ikPtr;
     if (type == EEndEffectorType::HEAD) ikPtr = m_linkId["headEE"]->getOrCreateIK();
@@ -176,7 +176,7 @@ int RobotSystem::InverseKinematics(EEndEffectorType type, Eigen::Isometry3d& pos
     return 0;
 }
 
-int RobotSystem::InverseKinematics(std::vector<std::pair<EEndEffectorType, Eigen::Isometry3d>>& eePoses, //需要抽象
+int RobotSystem::InverseKinematics(std::vector<std::pair<EEndEffectorType, Eigen::Isometry3d>>& eePoses, 
                                    Eigen::VectorXd& jointPos, bool ifUseWholeBody, bool ifApply) {
     std::shared_ptr<dart::dynamics::InverseKinematics> headIkPtr;
     std::shared_ptr<dart::dynamics::InverseKinematics> leftHandIkPtr;

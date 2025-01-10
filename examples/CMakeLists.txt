@@ -1,16 +1,16 @@
-add_executable(main
-main.cpp
+add_executable(ws_m1
+ws_m1.cpp
 )
 
-target_link_libraries(main
+target_link_libraries(ws_m1
 WorkSpaceAnalysis
 )
 
-add_executable(testload_m1_ws
-testload_m1_ws.cpp
+add_executable(ws_m1_load
+ws_m1_load.cpp
 )
 
-target_link_libraries(testload_m1_ws
+target_link_libraries(ws_m1_load
 WorkSpaceAnalysis
 )
 

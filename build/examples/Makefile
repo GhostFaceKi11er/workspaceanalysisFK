@@ -172,32 +172,32 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-examples/CMakeFiles/main.dir/rule:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/main.dir/rule
-.PHONY : examples/CMakeFiles/main.dir/rule
+examples/CMakeFiles/ws_m1.dir/rule:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/ws_m1.dir/rule
+.PHONY : examples/CMakeFiles/ws_m1.dir/rule
 
 # Convenience name for target.
-main: examples/CMakeFiles/main.dir/rule
-.PHONY : main
+ws_m1: examples/CMakeFiles/ws_m1.dir/rule
+.PHONY : ws_m1
 
 # fast build rule for target.
-main/fast:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/build
-.PHONY : main/fast
+ws_m1/fast:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/build
+.PHONY : ws_m1/fast
 
 # Convenience name for target.
-examples/CMakeFiles/testload_m1_ws.dir/rule:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/testload_m1_ws.dir/rule
-.PHONY : examples/CMakeFiles/testload_m1_ws.dir/rule
+examples/CMakeFiles/ws_m1_load.dir/rule:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/ws_m1_load.dir/rule
+.PHONY : examples/CMakeFiles/ws_m1_load.dir/rule
 
 # Convenience name for target.
-testload_m1_ws: examples/CMakeFiles/testload_m1_ws.dir/rule
-.PHONY : testload_m1_ws
+ws_m1_load: examples/CMakeFiles/ws_m1_load.dir/rule
+.PHONY : ws_m1_load
 
 # fast build rule for target.
-testload_m1_ws/fast:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/build
-.PHONY : testload_m1_ws/fast
+ws_m1_load/fast:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/build
+.PHONY : ws_m1_load/fast
 
 # Convenience name for target.
 examples/CMakeFiles/visualize.dir/rule:
@@ -212,54 +212,6 @@ visualize: examples/CMakeFiles/visualize.dir/rule
 visualize/fast:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/build
 .PHONY : visualize/fast
-
-main.o: main.cpp.o
-.PHONY : main.o
-
-# target to build an object file
-main.cpp.o:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/main.cpp.o
-.PHONY : main.cpp.o
-
-main.i: main.cpp.i
-.PHONY : main.i
-
-# target to preprocess a source file
-main.cpp.i:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/main.cpp.i
-.PHONY : main.cpp.i
-
-main.s: main.cpp.s
-.PHONY : main.s
-
-# target to generate assembly for a file
-main.cpp.s:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/main.cpp.s
-.PHONY : main.cpp.s
-
-testload_m1_ws.o: testload_m1_ws.cpp.o
-.PHONY : testload_m1_ws.o
-
-# target to build an object file
-testload_m1_ws.cpp.o:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/testload_m1_ws.cpp.o
-.PHONY : testload_m1_ws.cpp.o
-
-testload_m1_ws.i: testload_m1_ws.cpp.i
-.PHONY : testload_m1_ws.i
-
-# target to preprocess a source file
-testload_m1_ws.cpp.i:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/testload_m1_ws.cpp.i
-.PHONY : testload_m1_ws.cpp.i
-
-testload_m1_ws.s: testload_m1_ws.cpp.s
-.PHONY : testload_m1_ws.s
-
-# target to generate assembly for a file
-testload_m1_ws.cpp.s:
-	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/testload_m1_ws.cpp.s
-.PHONY : testload_m1_ws.cpp.s
 
 visualize.o: visualize.cpp.o
 .PHONY : visualize.o
@@ -285,6 +237,54 @@ visualize.cpp.s:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/visualize.cpp.s
 .PHONY : visualize.cpp.s
 
+ws_m1.o: ws_m1.cpp.o
+.PHONY : ws_m1.o
+
+# target to build an object file
+ws_m1.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/ws_m1.cpp.o
+.PHONY : ws_m1.cpp.o
+
+ws_m1.i: ws_m1.cpp.i
+.PHONY : ws_m1.i
+
+# target to preprocess a source file
+ws_m1.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/ws_m1.cpp.i
+.PHONY : ws_m1.cpp.i
+
+ws_m1.s: ws_m1.cpp.s
+.PHONY : ws_m1.s
+
+# target to generate assembly for a file
+ws_m1.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/ws_m1.cpp.s
+.PHONY : ws_m1.cpp.s
+
+ws_m1_load.o: ws_m1_load.cpp.o
+.PHONY : ws_m1_load.o
+
+# target to build an object file
+ws_m1_load.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/ws_m1_load.cpp.o
+.PHONY : ws_m1_load.cpp.o
+
+ws_m1_load.i: ws_m1_load.cpp.i
+.PHONY : ws_m1_load.i
+
+# target to preprocess a source file
+ws_m1_load.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/ws_m1_load.cpp.i
+.PHONY : ws_m1_load.cpp.i
+
+ws_m1_load.s: ws_m1_load.cpp.s
+.PHONY : ws_m1_load.s
+
+# target to generate assembly for a file
+ws_m1_load.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/ws_m1_load.cpp.s
+.PHONY : ws_m1_load.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -298,18 +298,18 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... test"
-	@echo "... main"
-	@echo "... testload_m1_ws"
 	@echo "... visualize"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
-	@echo "... testload_m1_ws.o"
-	@echo "... testload_m1_ws.i"
-	@echo "... testload_m1_ws.s"
+	@echo "... ws_m1"
+	@echo "... ws_m1_load"
 	@echo "... visualize.o"
 	@echo "... visualize.i"
 	@echo "... visualize.s"
+	@echo "... ws_m1.o"
+	@echo "... ws_m1.i"
+	@echo "... ws_m1.s"
+	@echo "... ws_m1_load.o"
+	@echo "... ws_m1_load.i"
+	@echo "... ws_m1_load.s"
 .PHONY : help
 
 

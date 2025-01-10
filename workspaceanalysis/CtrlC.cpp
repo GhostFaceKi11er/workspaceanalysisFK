@@ -4,12 +4,14 @@
 
 int CtrlC::NewvisitPointCount = 0;
 octomap::OcTree CtrlC::tree(0.05);
+std::string CtrlC::m_treefilePath = "/home/haitaoxu/workspaceanalysis/M1_full_load_10.bt";
+std::string CtrlC::m_filename = "/home/haitaoxu/workspaceanalysis/state.txt";
 
-
+//静态保存函数 保存Octree到treefilepath, NewvisitPointCount到filepath
 void CtrlC::saveState() {
-    tree.writeBinary("/home/haitaoxu/workspaceanalysis/M1_full_load_5.bt");
+    tree.writeBinary(CtrlC::m_treefilePath);
 
-    std::ofstream ofs("/home/haitaoxu/workspaceanalysis/state.txt", std::ios::out | std::ios::trunc);
+    std::ofstream ofs(CtrlC::m_filename, std::ios::out | std::ios::trunc);
     if (ofs.is_open()) {
         ofs << "NewvisitPointCount=" << CtrlC::NewvisitPointCount << std::endl;
         std::cout << "NewvisitPointCount=" << CtrlC::NewvisitPointCount << std::endl;
@@ -23,14 +25,14 @@ void CtrlC::saveState() {
 
 // 静态恢复状态函数
 void CtrlC::restoreState() {
-    if (std::filesystem::exists("/home/haitaoxu/workspaceanalysis/M1_full_load_5.bt")){ // 如果树文件存在，则读取树文件
-        tree.readBinary("/home/haitaoxu/workspaceanalysis/M1_full_load_5.bt");
+    if (std::filesystem::exists(CtrlC::m_treefilePath)){ // 如果树文件存在，则读取树文件
+        tree.readBinary(CtrlC::m_treefilePath);
     }
     else{
         std::cout << "treefilePath not exists" << std::endl;
     }
 
-    std::ifstream ifs("/home/haitaoxu/workspaceanalysis/state.txt");
+    std::ifstream ifs(CtrlC::m_filename);
     if (ifs.is_open()) {
         std::string line;
         while (std::getline(ifs, line)) {
@@ -43,5 +45,4 @@ void CtrlC::restoreState() {
         std::cout << "No previous state found. Starting fresh.\n";
         CtrlC::NewvisitPointCount = 0;
     }
-
 }

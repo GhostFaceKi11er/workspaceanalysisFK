@@ -549,30 +549,30 @@ WorkSpaceAnalysis/fast:
 .PHONY : WorkSpaceAnalysis/fast
 
 #=============================================================================
-# Target rules for targets named main
+# Target rules for targets named ws_m1
 
 # Build rule for target.
-main: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 main
-.PHONY : main
+ws_m1: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ws_m1
+.PHONY : ws_m1
 
 # fast build rule for target.
-main/fast:
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/main.dir/build.make examples/CMakeFiles/main.dir/build
-.PHONY : main/fast
+ws_m1/fast:
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1.dir/build.make examples/CMakeFiles/ws_m1.dir/build
+.PHONY : ws_m1/fast
 
 #=============================================================================
-# Target rules for targets named testload_m1_ws
+# Target rules for targets named ws_m1_load
 
 # Build rule for target.
-testload_m1_ws: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 testload_m1_ws
-.PHONY : testload_m1_ws
+ws_m1_load: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ws_m1_load
+.PHONY : ws_m1_load
 
 # fast build rule for target.
-testload_m1_ws/fast:
-	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/testload_m1_ws.dir/build.make examples/CMakeFiles/testload_m1_ws.dir/build
-.PHONY : testload_m1_ws/fast
+ws_m1_load/fast:
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/ws_m1_load.dir/build.make examples/CMakeFiles/ws_m1_load.dir/build
+.PHONY : ws_m1_load/fast
 
 #=============================================================================
 # Target rules for targets named visualize
@@ -629,9 +629,9 @@ help:
 	@echo "... NightlyTest"
 	@echo "... NightlyUpdate"
 	@echo "... WorkSpaceAnalysis"
-	@echo "... main"
-	@echo "... testload_m1_ws"
 	@echo "... visualize"
+	@echo "... ws_m1"
+	@echo "... ws_m1_load"
 .PHONY : help
 
 
