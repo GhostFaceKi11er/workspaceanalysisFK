@@ -279,22 +279,52 @@ private:
     dart::dynamics::VisualAspect* mPointCloudVisualAspect;
 };
 
-void IK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr skel, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits, 
-        int& NewvisitPointCount, std::vector<Eigen::Vector3d>& samplePoints, int samplePointsSize){
+
+class TWOTCPIK{
+public:
+    TWOTCPIK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr skel, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits, 
+        int& NewvisitPointCount, std::vector<Eigen::Vector3d>& samplePoints, int samplePointsSize): m_tree(tree), m_skel(skel), m_world(world), m_jointTorqueLimits(jointTorqueLimits), 
+        m_NewvisitPointCount(NewvisitPointCount), m_samplePoints(samplePoints), m_samplePointsSize(samplePointsSize) {}
+
+    Eigen::MatrixXd getRHjacobian(){
+        dart::dynamics::BodyNodePtr endEffector = m_skel->getBodyNode("rightHandEE");
+        Eigen::MatrixXd jacobian = m_skel->getJacobian(endEffector); //获得的是6*18的矩阵，包含了整个机器人的活动关节
+        jacobian = jacobian.topRows(3);
+        return jacobian;
+    }
+
+    Eigen::MatrixXd getLHjacobian(){
+        dart::dynamics::BodyNodePtr endEffector = m_skel->getBodyNode("leftHandEE");
+        Eigen::MatrixXd jacobian = m_skel->getJacobian(endEffector); //获得的是6*18的矩阵，包含了整个机器人的活动关节
+        jacobian = jacobian.topRows(3);
+
+        return jacobian;
+    }
+    
+    Eigen::VectorXd getRHtheta(){
+        Eigen::VectorXd theta = m_skel->getPositions(); //大小为18
+        return theta;
+    }
+
+    Eigen::VectorXd getLHtheta(){
+        Eigen::VectorXd theta = m_skel->getPositions(); //大小为18
+        return theta;
+    }
+
+    void IK(){
         std::cout << "IK" << std::endl;
-        std::cout << "NewvisitPointCount: " << NewvisitPointCount << std::endl;
+        std::cout << "NewvisitPointCount: " << m_NewvisitPointCount << std::endl;
         Eigen::Isometry3d rightHandTf;
         Eigen::Isometry3d leftHandTf;
-        double epsilon = 1e-2;
-        double alpha_steplenth = 0.2;
+        double epsilon = 1e-4;
+        double alpha_steplenth = 0.6;
         int iteration = 0;
         int newpointcount = 0;
 
-
         auto start_time_ik = std::chrono::steady_clock::now();
-        auto interval_time_ik = std::chrono::minutes(1);
+        auto interval_time_ik = std::chrono::minutes(5);
         auto target_time_ik = start_time_ik + interval_time_ik;
-        while (NewvisitPointCount < samplePointsSize){
+        while (m_NewvisitPointCount < m_samplePointsSize){
             auto current_time = std::chrono::steady_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(target_time_ik - current_time);
             if (duration.count() <= 0){ //至少每一个interval_time_ik检查一次
@@ -304,56 +334,59 @@ void IK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr skel, dart::simulatio
                 target_time_ik = current_time + interval_time_ik;
                 newpointcount = 0;
             }
-            for (int i = 0; i < samplePoints.size(); i++){
-                Eigen::Vector3d samplepoint = samplePoints[i];
+            for (int i = 0; i < m_samplePoints.size(); i++){
+                Eigen::Vector3d samplepoint = m_samplePoints[i];
                 //std::cout << "i: " << i << std::endl;
                 //设置末端执行器的目标位置
                 rightHandTf.translation() = samplepoint;
                 leftHandTf.translation() = samplepoint;
                 leftHandTf.translation()[1] = -rightHandTf.translation()[1]; //左手和右手的y的值只是正负号的区别
                 
-                dart::dynamics::BodyNodePtr endEffector = skel->getBodyNode("rightHandEE");
-                Eigen::MatrixXd jacobian = skel->getJacobian(endEffector); //获得的是3*18的矩阵，包含了整个机器人的活动关节
+                Eigen::MatrixXd rhJacobian = getRHjacobian(); //3*18
+                Eigen::MatrixXd lhJacobian = getLHjacobian(); //3*18
 
-                Eigen::MatrixXd newjacobian(jacobian.rows(), jacobian.cols() - 7);//删除左手的7个关节，
-                // 拷贝删除前的部分列
-                newjacobian << jacobian.leftCols(4), jacobian.rightCols(jacobian.cols() - 11);
-
-                Eigen::VectorXd theta = skel->getPositions(); //大小为18
-                Eigen::VectorXd firstPart = theta.head(4);  // 取前4个元素
-                // 2. 获取索引 11 到最后的部分
-                Eigen::VectorXd lastPart = theta.tail(theta.size() - 11);  // 取从索引 11 到最后的部分
-                // 3. 拼接前部分和后部分
-                Eigen::VectorXd singleArmTheta(theta.size() - 7);  // 新的向量大小是原来大小减去7
-                singleArmTheta << firstPart, lastPart;  // 拼接两部分，大小为11
+                Eigen::VectorXd RHtheta = getRHtheta();
+                Eigen::VectorXd LHtheta = getLHtheta();
+                // Eigen::VectorXd wholetheta(LHtheta.size()+RHtheta.size());
+                // wholetheta << LHtheta, RHtheta;
+                Eigen::VectorXd wholetheta(LHtheta.size());
+                //std::cout << "wholetheta.size(): " << wholetheta.size() << std::endl;
 
                 while (iteration < 1000){
-                    Eigen::Isometry3d eePose = skel->getBodyNode("rightHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
+                    Eigen::Isometry3d LHeePose = m_skel->getBodyNode("leftHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
+                    Eigen::Isometry3d RHeePose = m_skel->getBodyNode("rightHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
                     //计算位置误差
-                    Eigen::Vector3d translation_error = rightHandTf.translation() - eePose.translation();
-                    //std::cout << "translation_error: " << translation_error << std::endl;
-                    double translationError = translation_error.norm();
+                    Eigen::Vector3d RHtranslation_error = rightHandTf.translation() - RHeePose.translation();
+                    Eigen::Vector3d LHtranslation_error = leftHandTf.translation() - LHeePose.translation();
+                    //std::cout << "RHtranslation_error: " << RHtranslation_error << std::endl;
+                    Eigen::VectorXd translation_error(6);
+                    translation_error << LHtranslation_error, RHtranslation_error;
 
-                    Eigen::JacobiSVD<Eigen::MatrixXd> svd(newjacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
-                    Eigen::MatrixXd J_pseudo_inverse = svd.solve(Eigen::MatrixXd::Identity(newjacobian.rows(), newjacobian.rows()));
+                    Eigen::MatrixXd wholeJacobian(lhJacobian.rows()+rhJacobian.rows(), lhJacobian.cols()); //6*18
+                    wholeJacobian << lhJacobian, rhJacobian;
+                    //std::cout << "wholeJacobian.rows(): " << wholeJacobian.rows() << "  and .cols():"<< wholeJacobian.cols() << "translation_error.size(): " << translation_error.size() << std::endl;
+                    Eigen::JacobiSVD<Eigen::MatrixXd> svd(wholeJacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
+                    Eigen::MatrixXd J_pseudo_inverse = svd.solve(Eigen::MatrixXd::Identity(wholeJacobian.rows(), wholeJacobian.rows()));
 
+                    //std::cout << "J_pseudo_inverse.rows() and .cols(): " << J_pseudo_inverse.rows() << "  :"<< J_pseudo_inverse.cols() << "translation_error.size(): " << translation_error.size() << std::endl;
                     // 计算关节增量
                     Eigen::VectorXd delta_theta = J_pseudo_inverse * translation_error;
-                    singleArmTheta += alpha_steplenth * delta_theta;
-                    theta.segment(0, 4) = singleArmTheta.segment(0, 4);
-                    theta.segment(11, 7) = singleArmTheta.segment(4, 7);
-                    skel->setPositions(theta);
-
-                    if (translationError <= epsilon){
-                        Detector Detector(skel, world, jointTorqueLimits);
-                        bool jointTorqueFlag = Detector.checkJointTorque();
-                        if (!jointTorqueFlag){
-                            octomap::point3d point(samplepoint[0], samplepoint[1], samplepoint[2]);
-                            if (tree.search(point) == nullptr){
-                                tree.updateNode(point, true);
-                                NewvisitPointCount++;
+                    wholetheta += alpha_steplenth * delta_theta;
+                    // Eigen::VectorXd theta(skel->getPositions().size());
+                    // theta = wholetheta.segment(0,11) + wholetheta.segment(14, 7);
+                    //std::cout << "wholetheta.size(): " << wholetheta.size() << std::endl;
+                    m_skel->setPositions(wholetheta);
+                    //std::cout << "delta_theta.norm(): " << delta_theta.norm() << std::endl;
+                    if (delta_theta.norm() <= epsilon){
+                        octomap::point3d point(samplepoint[0], samplepoint[1], samplepoint[2]);
+                        if (m_tree.search(point) == nullptr){
+                            Detector Detector(m_skel, m_world, m_jointTorqueLimits);
+                            bool jointTorqueFlag = Detector.checkJointTorque();
+                            if (!jointTorqueFlag){
+                                m_tree.updateNode(point, true);
+                                m_NewvisitPointCount++;
                                 newpointcount++;
-                                std::cout << "i: "<< i <<" NewvisitPointCount: " << NewvisitPointCount << " newpointcount:" << newpointcount << " duration: " << duration.count() << " point: " << point << std::endl;
+                                std::cout << "i: "<< i <<" NewvisitPointCount: " << m_NewvisitPointCount << " newpointcount:" << newpointcount << " duration: " << duration.count() << " point: " << point << std::endl;
                                 iteration = 1000;
                             }
                         }
@@ -365,51 +398,17 @@ void IK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr skel, dart::simulatio
         }
         std::cout << "IK end" << std::endl;
 }
-
-class MultiTaskIK {
-public:
-    MultiTaskIK(std::vector<Eigen::MatrixXd> jacobians, 
-                std::vector<Eigen::VectorXd> task_errors,
-                std::vector<double> task_weights)
-        : jacobians_(jacobians), task_errors_(task_errors), task_weights_(task_weights) {}
-
-    Eigen::VectorXd solve(Eigen::VectorXd initial_theta) {
-        Eigen::VectorXd theta = initial_theta;
-        Eigen::VectorXd delta_theta = Eigen::VectorXd::Zero(theta.size());
-
-        for (int iteration = 0; iteration < max_iterations_; iteration++) {
-            Eigen::MatrixXd A = Eigen::MatrixXd::Zero(theta.size(), theta.size());
-            Eigen::VectorXd B = Eigen::VectorXd::Zero(theta.size());
-
-            // Form the A matrix and B vector based on tasks
-            for (size_t i = 0; i < jacobians_.size(); i++) {
-                Eigen::MatrixXd J_i = jacobians_[i];
-                Eigen::VectorXd delta_x_i = task_errors_[i];
-                double weight_i = task_weights_[i];
-                A += weight_i * J_i.transpose() * J_i;
-                B += weight_i * J_i.transpose() * delta_x_i;
-            }
-
-            // Solve for delta_theta
-            delta_theta = A.ldlt().solve(B);
-            theta += delta_theta;
-
-            // Check for convergence
-            if (delta_theta.norm() < epsilon_) {
-                break;
-            }
-        }
-
-        return theta;
-    }
-
 private:
-    std::vector<Eigen::MatrixXd> jacobians_;
-    std::vector<Eigen::VectorXd> task_errors_;
-    std::vector<double> task_weights_;
-    int max_iterations_ = 1000;
-    double epsilon_ = 1e-5;
+    octomap::OcTree& m_tree;
+    dart::dynamics::SkeletonPtr& m_skel;
+    dart::simulation::WorldPtr& m_world;
+    Eigen::VectorXd& m_jointTorqueLimits; 
+    int& m_NewvisitPointCount;
+    std::vector<Eigen::Vector3d>& m_samplePoints;
+    int& m_samplePointsSize;
+
 };
+
 
 int main() {
     signal(SIGINT, signalHandler); 
@@ -444,7 +443,7 @@ int main() {
     
     //定义要分析的空间范围
     double x_min = 0.6, x_max = 0.8;
-    double y_min = -0.1, y_max = 0.1;
+    double y_min = -0.3, y_max = 0.3;
     double z_min = 0.5, z_max = 0.7;
     
     //可视化时获取右手末端执行器的位置，从而设置y轴的值，只显示该平面的有效点
@@ -488,7 +487,8 @@ int main() {
         //bool IKflag = FK(tree, skel, newvisitpointratio, processRatio, revoluteJointIndex, samplebound, world, jointTorqueLimits, NewvisitPointCount, randomJointsConfigs, samplePointsSize);
         bool IKflag = true;
         if (IKflag) { // 如果计算正运动学遍历不完，则继续进行逆运动学
-            IK(tree, skel, world, jointTorqueLimits, NewvisitPointCount, samplePoints, samplePointsSize);
+            TWOTCPIK TWOTCPIK(tree, skel, world, jointTorqueLimits, NewvisitPointCount, samplePoints, samplePointsSize);
+            TWOTCPIK.IK();
         }
     }
     else if (ProgramProcessMode == ProgramProcessMode_Visualize){

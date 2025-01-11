@@ -1,1 +1,1 @@
-NewvisitPointCount=2
+NewvisitPointCount=29

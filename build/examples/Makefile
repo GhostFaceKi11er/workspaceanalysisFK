@@ -200,6 +200,20 @@ ws_m1_load/fast:
 .PHONY : ws_m1_load/fast
 
 # Convenience name for target.
+examples/CMakeFiles/twoTCPIK.dir/rule:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/twoTCPIK.dir/rule
+.PHONY : examples/CMakeFiles/twoTCPIK.dir/rule
+
+# Convenience name for target.
+twoTCPIK: examples/CMakeFiles/twoTCPIK.dir/rule
+.PHONY : twoTCPIK
+
+# fast build rule for target.
+twoTCPIK/fast:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/twoTCPIK.dir/build.make examples/CMakeFiles/twoTCPIK.dir/build
+.PHONY : twoTCPIK/fast
+
+# Convenience name for target.
 examples/CMakeFiles/visualize.dir/rule:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 examples/CMakeFiles/visualize.dir/rule
 .PHONY : examples/CMakeFiles/visualize.dir/rule
@@ -212,6 +226,30 @@ visualize: examples/CMakeFiles/visualize.dir/rule
 visualize/fast:
 	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/visualize.dir/build.make examples/CMakeFiles/visualize.dir/build
 .PHONY : visualize/fast
+
+twoTCPIK.o: twoTCPIK.cpp.o
+.PHONY : twoTCPIK.o
+
+# target to build an object file
+twoTCPIK.cpp.o:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/twoTCPIK.dir/build.make examples/CMakeFiles/twoTCPIK.dir/twoTCPIK.cpp.o
+.PHONY : twoTCPIK.cpp.o
+
+twoTCPIK.i: twoTCPIK.cpp.i
+.PHONY : twoTCPIK.i
+
+# target to preprocess a source file
+twoTCPIK.cpp.i:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/twoTCPIK.dir/build.make examples/CMakeFiles/twoTCPIK.dir/twoTCPIK.cpp.i
+.PHONY : twoTCPIK.cpp.i
+
+twoTCPIK.s: twoTCPIK.cpp.s
+.PHONY : twoTCPIK.s
+
+# target to generate assembly for a file
+twoTCPIK.cpp.s:
+	cd /home/haitaoxu/workspaceanalysis/build && $(MAKE) $(MAKESILENT) -f examples/CMakeFiles/twoTCPIK.dir/build.make examples/CMakeFiles/twoTCPIK.dir/twoTCPIK.cpp.s
+.PHONY : twoTCPIK.cpp.s
 
 visualize.o: visualize.cpp.o
 .PHONY : visualize.o
@@ -298,9 +336,13 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... test"
+	@echo "... twoTCPIK"
 	@echo "... visualize"
 	@echo "... ws_m1"
 	@echo "... ws_m1_load"
+	@echo "... twoTCPIK.o"
+	@echo "... twoTCPIK.i"
+	@echo "... twoTCPIK.s"
 	@echo "... visualize.o"
 	@echo "... visualize.i"
 	@echo "... visualize.s"

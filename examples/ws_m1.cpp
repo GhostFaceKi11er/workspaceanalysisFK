@@ -215,58 +215,6 @@ bool FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr m1, double ratio, std
     return false;
 }
 
-class IK{
-public:
-    IK(dart::dynamics::SkeletonPtr m1, octomap::OcTree& tree,  dart::simulation::WorldPtr& world, 
-    Eigen::VectorXd& jointTorqueLimits): m_m1(m1),  m_tree(tree), m_world(world), 
-    m_jointTorqueLimits(jointTorqueLimits) {}
-// 逆运动学求解函数
-    bool solveIK() {
-        dart::dynamics::BodyNode* rightHandEE = m_m1->getBodyNode("rightHandEE");
-        dart::dynamics::InverseKinematicsPtr ik = rightHandEE->getOrCreateIK();
-        Eigen::Isometry3d targetTransform = Eigen::Isometry3d::Identity();
-        targetTransform.translation() = Eigen::Vector3d(m_targetPosition); // 设置目标位置
-        ik->getTarget()->setTransform(targetTransform);
-        if (ik->solveAndApply()) { //如果有解默认就apply到skeleton上
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-
-    void ik() {//IK
-            std::cout << "IK" << std::endl;
-            for (auto it = m_tree.begin_leafs(), end = m_tree.end_leafs(); it != end; ++it) {
-                if (it->getValue() != 1) {
-                    octomap::point3d m_point = it.getCoordinate();
-                    Eigen::Vector3d m_targetPosition(m_point.x(), m_point.y(), m_point.z());
-
-                    // 假设有一个函数 solveIK(targetPosition) 返回是否有解
-                    bool hasSolution = solveIK();
-                    CollisionDetector CollisionDetector(m_m1, m_world, m_jointTorqueLimits);
-                    bool collisionFlag = CollisionDetector.checkCollision();
-                    bool jointTorqueFlag = CollisionDetector.checkJointTorque();
-
-                    if (hasSolution && !collisionFlag && !jointTorqueFlag) {
-                        //it->setValue(1);
-                        m_tree.updateNode(m_point, true); // 将指定的点（point）所在的叶节点更新为 占据状态（occupied）。
-                    } else {
-                        //it->setValue(0);
-                        m_tree.updateNode(m_point, false); // 将指定的点（point）所在的叶节点更新为 空闲状态（free）。
-                    }
-                }
-            }
-        }
-private:
-    dart::dynamics::SkeletonPtr m_m1;
-    const Eigen::Vector3d m_targetPosition;
-    octomap::OcTree m_tree;
-    dart::simulation::WorldPtr m_world;
-    Eigen::VectorXd m_jointTorqueLimits;
-    octomap::point3d m_point;
-};
-
 dart::dynamics::SimpleFramePtr createPointCloudFrame() {
     auto pointCloudShape = ::std::make_shared<::dart::dynamics::PointCloudShape>();
     pointCloudShape->setPointShapeType(::dart::dynamics::PointCloudShape::BOX);
@@ -422,10 +370,6 @@ int main() {
         double ratio = 6/100;
         bool IKflag = false;
         IKflag = FK(tree, m1, ratio, revoluteJointIndex, IKflag, samplebound, world, jointTorqueLimits, NewvisitPointCount, randomJointsConfigs, samplePointsSize);
-        if (IKflag) { // 如果计算正运动学遍历不完，则继续进行逆运动学
-            IK IK(m1, tree, world, jointTorqueLimits);
-            IK.ik();
-            }
     }
     else if (ProgramProcessMode == ProgramProcessMode_Continue){
         std::cout << "ProgramProcessMode_Continue" << std::endl;
@@ -450,12 +394,6 @@ int main() {
 
             std::cout << "FK" << std::endl; // 计算正运动学
             double ratio = 6/100;
-            bool IKflag = false;
-            IKflag = FK(tree, m1, ratio, revoluteJointIndex, IKflag, samplebound, world, jointTorqueLimits, NewvisitPointCount, randomJointsConfigs, samplePointsSize);
-            if (IKflag) { // 如果计算正运动学遍历不完，则继续进行逆运动学
-                IK IK(m1, tree, world, jointTorqueLimits);
-                IK.ik();
-            }
         }
         else{
             std::cout << "treefilePath not exists" << std::endl;

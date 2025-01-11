@@ -14,6 +14,14 @@ target_link_libraries(ws_m1_load
 WorkSpaceAnalysis
 )
 
+add_executable(twoTCPIK
+twoTCPIK.cpp
+)
+
+target_link_libraries(twoTCPIK
+WorkSpaceAnalysis
+)
+
 add_executable(visualize
 visualize.cpp
 )

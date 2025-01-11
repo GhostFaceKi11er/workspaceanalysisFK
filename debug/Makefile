@@ -575,6 +575,19 @@ ws_m1_load/fast:
 .PHONY : ws_m1_load/fast
 
 #=============================================================================
+# Target rules for targets named twoTCPIK
+
+# Build rule for target.
+twoTCPIK: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 twoTCPIK
+.PHONY : twoTCPIK
+
+# fast build rule for target.
+twoTCPIK/fast:
+	$(MAKE) $(MAKESILENT) -f examples/CMakeFiles/twoTCPIK.dir/build.make examples/CMakeFiles/twoTCPIK.dir/build
+.PHONY : twoTCPIK/fast
+
+#=============================================================================
 # Target rules for targets named visualize
 
 # Build rule for target.
@@ -629,6 +642,7 @@ help:
 	@echo "... NightlyTest"
 	@echo "... NightlyUpdate"
 	@echo "... WorkSpaceAnalysis"
+	@echo "... twoTCPIK"
 	@echo "... visualize"
 	@echo "... ws_m1"
 	@echo "... ws_m1_load"
