@@ -1217,8 +1217,11 @@ examples/CMakeFiles/twoTCPIK.dir/twoTCPIK.cpp.o: ../examples/twoTCPIK.cpp \
   /usr/include/dart/simulation/detail/World-impl.hpp \
   /usr/include/dart/utils/urdf/DartLoader.hpp \
   /usr/include/dart/utils/CompositeResourceRetriever.hpp \
-  /usr/include/dart/utils/PackageResourceRetriever.hpp
+  /usr/include/dart/utils/PackageResourceRetriever.hpp \
+  ../workspaceanalysis/SpaceSampler.h
 
+
+../workspaceanalysis/SpaceSampler.h:
 
 /usr/include/dart/simulation/World.hpp:
 

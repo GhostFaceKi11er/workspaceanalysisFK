@@ -89,8 +89,8 @@ private:
 };
 
 int main() {
-    std::string treefilePath = "/home/haitaoxu/workspaceanalysis/M1_full_load.bt";
-    std::string urdfFile = "/home/haitaoxu/workspaceanalysis/models/M1/M1_full_load.urdf";
+    std::string treefilePath = "/home/haitaoxu/workspaceanalysis/M1_full.bt";
+    std::string urdfFile = "/home/haitaoxu/workspaceanalysis/models/M1/M1_full.urdf";
 
     dart::simulation::WorldPtr world = dart::simulation::World::create();
     dart::utils::DartLoader urdf;
@@ -99,9 +99,9 @@ int main() {
 
     double resolution = 0.01;
 
-    double x_min = -0.22, x_max = 2.2;
+    double x_min = -0.2, x_max = 2.0;
     double y_min, y_max;
-    double z_min = -0.2, z_max = 2.2;
+    double z_min = 0.0, z_max = 2.0;
 
     auto rh = m1->getBodyNode("rightHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
     Eigen::Vector3d eePos = rh.translation();

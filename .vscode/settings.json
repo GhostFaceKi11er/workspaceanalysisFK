@@ -154,7 +154,9 @@
         "texture": "cpp",
         "vertexarraystate": "cpp",
         "buffered_value": "cpp",
-        "callback": "cpp"
+        "callback": "cpp",
+        "block": "cpp",
+        "imagepager": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++-11"
 }

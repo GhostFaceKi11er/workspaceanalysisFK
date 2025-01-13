@@ -319,13 +319,13 @@ int main() {
 
 
     double x_min = -0.2, x_max = 2.0;
-    double y_min, y_max;
+    double y_min = -0.6, y_max = 0.6;
     double z_min = 0.0, z_max = 2.0;
 
     auto rh = m1->getBodyNode("rightHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
     Eigen::Vector3d eePos = rh.translation();
-    y_min = eePos.y();
-    y_max = eePos.y();
+    // y_min = eePos.y();
+    // y_max = eePos.y();
     // 设置负载物体中心位置的采样范围
     // 10kg
     // double x_min = 0.3;
@@ -409,6 +409,12 @@ int main() {
         else{
             std::cout << "treefilePath not exists" << std::endl;
         }
+    }
+
+    octomap::point3d point(0.5, -0.3, 0.5);
+    if (tree.search(point) != nullptr){
+        std::cout << point << "Reachable!" << std::endl;
+        return 0;
     }
 
     auto pointCloudFrame = createPointCloudFrame(); //createPointCloudFrame 函数创建一个 SimpleFrame，用于表示点云在仿真环境中的位置和方向。
