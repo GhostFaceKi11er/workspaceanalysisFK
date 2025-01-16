@@ -302,7 +302,7 @@ int main() {
     signal(SIGINT, signalHandler); 
 
     std::string treefilePath = "/home/haitaoxu/workspaceanalysis/M1_full_load_10.bt";
-    std::string filename = "/home/haitaoxu/workspaceanalysis/state.txt";
+    std::string filename = "/home/haitaoxu/workspaceanalysis/NewvisitPointCount_load.txt";
     std::string urdfFile = "/home/haitaoxu/workspaceanalysis/models/M1/M1_full_load.urdf";
 
     //选择是对工作空间进行分析还是可视化

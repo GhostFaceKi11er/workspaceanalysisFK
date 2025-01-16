@@ -98,7 +98,6 @@ public:
         double alpha_steplenth = 0.5;
         int iteration = 0;
         std::vector<std::vector<double>> jointsLimits = this->getJointsLimits();
-        double count = 0;
         double previousErrorNorm;
 
         //末端执行器的目标位姿
@@ -112,6 +111,11 @@ public:
         Eigen::Quaterniond quaternionLHtarget(rotationMatrixLH);      // 通过旋转矩阵构造四元数
         Eigen::Matrix3d rotationMatrixRH = rightHandTf.linear(); // 获取旋转矩阵
         Eigen::Quaterniond quaternionRHtarget(rotationMatrixRH);      // 通过旋转矩阵构造四元数
+
+        std::cout << "Left hand initial translation: " << m_skel->getBodyNode("leftHandEE")->getWorldTransform().translation().transpose() << std::endl;
+        std::cout << "Left hand initial rotation: " << std::endl << m_skel->getBodyNode("leftHandEE")->getWorldTransform().rotation().matrix() << std::endl;
+        std::cout << "Right hand initial translation: " << m_skel->getBodyNode("rightHandEE")->getWorldTransform().translation().transpose() << std::endl;
+        std::cout << "Right hand initial rotation: " << std::endl << m_skel->getBodyNode("rightHandEE")->getWorldTransform().rotation().matrix() << std::endl;
 
         while (iteration < m_maxiteration){
             //得到左手的雅克比矩阵
@@ -129,17 +133,17 @@ public:
             Eigen::Isometry3d LHeePose = m_skel->getBodyNode("leftHandEE")->getWorldTransform();
             Eigen::Matrix3d rotationMatrixLH = LHeePose.linear();
             Eigen::Quaterniond quaternionLHcurrent(rotationMatrixLH);
+
             //右TCP当前的旋转矩阵的四元数
             Eigen::Isometry3d RHeePose = m_skel->getBodyNode("rightHandEE")->getWorldTransform();
             Eigen::Matrix3d rotationMatrixRH = RHeePose.linear();
-            Eigen::Quaterniond quaternionRHcurrent(rotationMatrixRH);            
+            Eigen::Quaterniond quaternionRHcurrent(rotationMatrixRH);
 
             //计算左手的姿态误差
             Eigen::Vector3d LHrotation_error = this->computeRotationError(quaternionLHcurrent, quaternionLHtarget);
             Eigen::Vector6d poseErrorLH;
             Eigen::Vector3d RHrotation_error = this->computeRotationError(quaternionRHcurrent, quaternionRHtarget);
             Eigen::Vector6d poseErrorRH;
-            // std::cout << "-----------------------" << std::endl;
             //得到关节配置
             Eigen::VectorXd theta = m_skel->getPositions();
             
@@ -147,8 +151,8 @@ public:
             Eigen::Vector3d RHtranslation_error = rightHandTf.translation() - RHeePose.translation();
             Eigen::Vector3d LHtranslation_error = leftHandTf.translation() - LHeePose.translation();
             
-            // LHrotation_error = Eigen::Vector3d::Zero();
-            // RHrotation_error = Eigen::Vector3d::Zero();
+            LHrotation_error = Eigen::Vector3d::Zero();
+            RHrotation_error = Eigen::Vector3d::Zero();
             poseErrorLH << LHtranslation_error, LHrotation_error;
             poseErrorRH << RHtranslation_error, RHrotation_error;
             Eigen::VectorXd totalError(12);
@@ -175,10 +179,14 @@ public:
                 if (allWithinLimits) {          
                     std::cout << "Solution found using DIY IK within the time limit!" << std::endl;
                     m_skel->setPositions(theta);
-                    count++;
+                    std::cout << "Left hand final translation: " << m_skel->getBodyNode("leftHandEE")->getWorldTransform().translation().transpose() << std::endl
+                    << "Left hand final rotation: " << std::endl << m_skel->getBodyNode("leftHandEE")->getWorldTransform().rotation().matrix() << std::endl
+                    << "Right hand final translation: " << m_skel->getBodyNode("rightHandEE")->getWorldTransform().translation().transpose() << std::endl
+                    << "Right hand final rotation: " << std::endl << m_skel->getBodyNode("rightHandEE")->getWorldTransform().rotation().matrix() << std::endl;
                     return true;
                 }
             }
+
             //动态调整步长
             if (iteration > 0 && errorNorm > 1.1 * previousErrorNorm) {
                 alpha_steplenth *= 0.8;  // 减小步长变化
@@ -207,16 +215,12 @@ public:
                 }
             }
             m_skel->setPositions(theta);
-            //std::cout << "delta_theta_lh: " << delta_theta_lh.transpose() << std::endl << " delta_theta_rh: " << delta_theta_rh.transpose() << std::endl;
             if (iteration%10 == 0){
                 std::cout << "iteration: " << iteration << " errorNorm.norm(): " << errorNorm << std::endl;
-                // std::cout << "theta:" << theta << std::endl;
-                //std::cout << "delta_theta_lh: " << delta_theta_lh.transpose() << std::endl << " delta_theta_rh: " << delta_theta_rh.transpose() << std::endl;
             }
 
             previousErrorNorm = errorNorm;
             iteration++;
-            //std::cout << "totaliteration: " << totaliteration << " count: " << count << std::endl;
         }
     std::cout << "No solution found using DIY IK within the time limit." << std::endl;
     return false;
@@ -225,16 +229,14 @@ public:
     //对左手求逆解
     bool getIK_diy_leftarm(){
         std::cout << "Finding solution using DIY IK..." << std::endl;
-        //chu shi hua zi tai
+        //初始姿态
         std::vector<std::vector<double>> jointsLimits = this->getJointsLimits();
         m_skel->setPositions(Eigen::VectorXd(m_skel->getNumDofs()).setZero());
         Eigen::Isometry3d leftHandTf = Eigen::Isometry3d::Identity();
         Eigen::Isometry3d rightHandTf = Eigen::Isometry3d::Identity();
         double epsilon = 1e-9;
         double alpha_steplenth = 0.3;
-        //double alpha_steplenth = 0.001185;
         int iteration = 0;
-        double count = 0;
         double previousErrorNorm;
         //设置末端执行器的目标位置
         leftHandTf.translation() = m_TCPTargetPositionsLeftAndRight[0].translation();
@@ -242,29 +244,31 @@ public:
         Eigen::Matrix3d rotationMatrixTP = leftHandTf.linear(); // 获取旋转矩阵
         Eigen::Quaterniond quaternionLHtarget(rotationMatrixTP);      // 通过旋转矩阵构造四元数
         Eigen::VectorXd theta = m_skel->getPositions();
-        std::cout << "leftHandTf.translation(): " << leftHandTf.translation() << " leftHandTf.linear(): " << leftHandTf.linear() << std::endl;
         
-
         while (iteration < m_maxiteration){
+            //得到左手的雅克比矩阵
             Eigen::MatrixXd linearJacobian = m_skel->getLinearJacobian(m_skel->getBodyNode("leftHandEE")); //3*18
             Eigen::MatrixXd angularJacobian = m_skel->getAngularJacobian(m_skel->getBodyNode("leftHandEE")); //3*18
             Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(6, 18);
             jacobian << linearJacobian, angularJacobian;
-            //std::cout << "jacobian: " << jacobian << std::endl;
+
+            //得到左手的当前姿态
             Eigen::Isometry3d LHeePose = m_skel->getBodyNode("leftHandEE")->getWorldTransform();
             Eigen::Matrix3d rotationMatrixLH = LHeePose.linear();
             Eigen::Quaterniond quaternionLHcurrent(rotationMatrixLH);
 
             //计算姿态误差
             Eigen::Vector3d LHrotation_error = this->computeRotationError(quaternionLHcurrent, quaternionLHtarget);
+
             //计算位置误差
             Eigen::Vector3d LHtranslation_error = leftHandTf.translation() - LHeePose.translation();
             Eigen::Vector6d poseError;
+
+            //计算总的误差
             poseError << LHtranslation_error, LHrotation_error;
 
             //伪逆法
             Eigen::MatrixXd J_pseudo_inverse_lh = getPseodoInverseJacobian(jacobian, alpha_steplenth);
-
 
             // 计算误差，如果误差小于epsilon则判断关节角度是否在关节限位内，如果没有超限则停止迭代
             double errorNorm = poseError.norm();
@@ -289,7 +293,6 @@ public:
                     std::cout << "Solution found using DIY IK within the time limit and all joints within limits!" << std::endl;
                     std::cout << "theta: " << theta.transpose() << std::endl;
                     m_skel->setPositions(theta);
-                    count++;
                     return true;
                 }
                 else {
@@ -308,8 +311,6 @@ public:
 
             //计算关节增量, 更新关节配置
             Eigen::VectorXd delta_theta = J_pseudo_inverse_lh * poseError;
-            //std::cout << "delta_theta_lh: " << delta_theta_lh.transpose() << std::endl;
-            //std::cout << "delta_theta: " << delta_theta.transpose() << std::endl;
             theta += alpha_steplenth * delta_theta;
 
 
@@ -333,7 +334,7 @@ public:
     //对右手求逆解
     bool getIK_diy_rightarm(){
         std::cout << "Finding solution using DIY IK..." << std::endl;
-        //chu shi hua zi tai
+        //初始姿态
         std::vector<std::vector<double>> jointsLimits = this->getJointsLimits();
         m_skel->setPositions(Eigen::VectorXd(m_skel->getNumDofs()).setZero());
         Eigen::Isometry3d leftHandTf = Eigen::Isometry3d::Identity();
@@ -341,42 +342,39 @@ public:
         double epsilon = 1e-9;
         double alpha_steplenth = 0.3;
         int iteration = 0;
-        double count = 0;
         double previousErrorNorm;
+
         //设置末端执行器的目标位置
         rightHandTf.translation() = m_TCPTargetPositionsLeftAndRight[1].translation();
         rightHandTf.linear() = m_TCPTargetPositionsLeftAndRight[1].linear();
         Eigen::Matrix3d rotationMatrixTP = rightHandTf.linear(); // 获取旋转矩阵
-        Eigen::Quaterniond quaternionRHtarget(rotationMatrixTP);      // 通过旋转矩阵构造四元数
+        Eigen::Quaterniond quaternionRHtarget(rotationMatrixTP); // 通过旋转矩阵构造四元数
         Eigen::VectorXd theta = m_skel->getPositions();
-        std::cout << "rightHandTf.translation(): " << rightHandTf.translation() << " rightHandTf.linear(): " << rightHandTf.linear() << std::endl;
-        
 
         while (iteration < m_maxiteration){
-            // Eigen::MatrixXd wholejacobian = m_skel->getJacobian(m_skel->getBodyNode("rightHandEE"));
+            //得到右手的雅克比矩阵
             Eigen::MatrixXd linearJacobian = m_skel->getLinearJacobian(m_skel->getBodyNode("rightHandEE")); //3*18
             Eigen::MatrixXd angularJacobian = m_skel->getAngularJacobian(m_skel->getBodyNode("rightHandEE")); //3*18
-            // std::cout << "whole: " << wholejacobian << "\n---------------------------";
             Eigen::MatrixXd jacobian = Eigen::MatrixXd::Zero(6, 18);
-            // jacobian << wholejacobian;
             jacobian << linearJacobian, angularJacobian;
-            // std::cout << "whole2: " << jacobian << "\n";
 
-            //std::cout << "jacobian: " << jacobian << std::endl;
+            //得到右手的当前姿态
             Eigen::Isometry3d RHeePose = m_skel->getBodyNode("rightHandEE")->getWorldTransform();
             Eigen::Matrix3d rotationMatrixRH = RHeePose.linear();
             Eigen::Quaterniond quaternionRHcurrent(rotationMatrixRH);
 
             //计算姿态误差
             Eigen::Vector3d RHrotation_error = this->computeRotationError(quaternionRHcurrent, quaternionRHtarget);
+
             //计算位置误差
             Eigen::Vector3d RHtranslation_error = rightHandTf.translation() - RHeePose.translation();
             Eigen::Vector6d poseError;
+
+            //计算总的误差
             poseError << RHtranslation_error, RHrotation_error;
 
             //伪逆法
             Eigen::MatrixXd J_pseudo_inverse_rh = getPseodoInverseJacobian(jacobian, alpha_steplenth);
-
 
             // 计算误差，如果误差小于epsilon则判断关节角度是否在关节限位内，如果没有超限则停止迭代
             double errorNorm = poseError.norm();
@@ -401,7 +399,6 @@ public:
                     std::cout << "Solution found using DIY IK within the time limit and all joints within limits!" << std::endl;
                     std::cout << "theta: " << theta.transpose() << std::endl;
                     m_skel->setPositions(theta);
-                    count++;
                     return true;
                 }
                 else {
@@ -420,8 +417,6 @@ public:
 
             //计算关节增量, 更新关节配置
             Eigen::VectorXd delta_theta = J_pseudo_inverse_rh * poseError;
-            //std::cout << "delta_theta_lh: " << delta_theta_lh.transpose() << std::endl;
-            //std::cout << "delta_theta: " << delta_theta.transpose() << std::endl;
             theta += alpha_steplenth * delta_theta;
 
 
@@ -521,11 +516,13 @@ int main(){
     //设置2个end effector的目标位姿
     LHeePose.translation()[0] += 0.6;
     RHeePose.translation()[0] += 0.6;
+    LHeePose.translation()[1] += 0.4;
+    RHeePose.translation()[1] -= 0.4;
     LHeePose.translation()[2] -= 0.2;
     RHeePose.translation()[2] -= 0.2;
     std::vector<Eigen::Isometry3d> TCPTargetPositionsLeftAndRight = {LHeePose, RHeePose};
-    std::cout << "LHeePose.translation(): " << LHeePose.translation() << " LHeePose.linear(): " << LHeePose.linear() << std::endl;
-    std::cout << "RHeePose.translation(): " << RHeePose.translation() << " RHeePose.linear(): " << RHeePose.linear() << std::endl;
+    std::cout << "Left hand target translation: " << LHeePose.translation().transpose() << std::endl << "Left hand target rotation: " << std::endl << LHeePose.linear() << std::endl;
+    std::cout << "Right hand target translation: " << RHeePose.translation().transpose() << std::endl << "Right hand target rotation: " << std::endl << RHeePose.linear() << std::endl;
 
     //dart中的方法对2TCP求解
     bool ifUseWholeBody = false;
