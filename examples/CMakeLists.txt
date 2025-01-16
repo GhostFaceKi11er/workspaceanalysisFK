@@ -21,11 +21,3 @@ twoTCPIK.cpp
 target_link_libraries(twoTCPIK
 WorkSpaceAnalysis
 )
-
-add_executable(visualize
-visualize.cpp
-)
-
-target_link_libraries(visualize
-WorkSpaceAnalysis
-)

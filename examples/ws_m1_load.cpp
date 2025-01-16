@@ -20,16 +20,15 @@
 #include <ctime>
 #include <csignal>
 #include <CtrlC.h>
-//#include <octovis/octovis.h>
-// 修正类定义
 
 //检测碰撞，力矩是否超限
 class Detector{
 public:
     Detector(dart::dynamics::SkeletonPtr& skel, dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits): m_skel(skel), m_world(world), m_jointTorqueLimits(jointTorqueLimits) {}
-
+    
+    // 检测自碰撞 
     bool checkCollision(){
-        auto Detector = m_world->getConstraintSolver()->getCollisionDetector(); // 检测自碰撞    
+        auto Detector = m_world->getConstraintSolver()->getCollisionDetector();    
         auto collisionGroup = Detector->createCollisionGroup(m_skel.get()); //创建一个碰撞组（CollisionGroup），包含机器人所有的碰撞几何体
         dart::collision::CollisionOption option;  //碰撞检测选项（如是否需要详细结果）
         dart::collision::CollisionResult result;  //碰撞检测结果（如发生碰撞的物体对、碰撞点等）。
@@ -39,14 +38,13 @@ public:
         else return false;
         }
 
+    // 检测关节力矩是否超限
     bool checkJointTorque() {
         // 逆动力学计算每个关节的力矩
         m_skel->computeInverseDynamics();
         Eigen::VectorXd jointForces = m_skel->getForces();
-        // std::cout << "\n### current jointForces: \n" << jointForces.transpose() << std::endl;
         for (int i = 0; i < jointForces.size(); ++i) {
             if (jointForces[i] > m_jointTorqueLimits[i] || jointForces[i] < -m_jointTorqueLimits[i]) {
-                // std::cout << "joint " << i << " torque invalid!\n" << std::endl;
                 return true;
             }
         }
@@ -67,30 +65,30 @@ public:
     
     //对当前关节在上限，下限内根据分辨率随机采样
     double generateRandom(double lower, double upper, double resolution) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(lower, upper);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(lower, upper);
 
-    // 使用分辨率对随机数进行调整
-    double randomValue = dis(gen);
-    return std::round(randomValue / resolution) * resolution;
+        // 使用分辨率对随机数进行调整
+        double randomValue = dis(gen);
+        return std::round(randomValue / resolution) * resolution;
     }
 
     //返回所有旋转关节的索引
     std::vector<int> getrevoluteJointIndex(){
         std::vector<int> revoluteJointIndex;
         int jointCount = 0;
-        //std::cout << "skel->getNumDofs(): " << skel->getNumDofs() << std::endl;
         for (size_t i = 0; i < m_skel->getNumJoints(); ++i) { // 遍历单链关节
             auto joint = m_skel->getJoint(i);
             if (jointCount >= m_singlechaindofs) break;
+
+            // 如果关节是旋转关节
             if (auto revoluteJoint = dynamic_cast<dart::dynamics::RevoluteJoint*>(joint)){
-                //revoluteJointCount++;
                 revoluteJointIndex.push_back(i);
                 std::cout << "revoluteJoint: " << m_skel->getJoint(i)->getName() << std::endl;
                 jointCount++;
                 std::cout << "jointCount: " << jointCount << std::endl;
-            } // 如果关节是旋转关节
+            }
         }
         std::cout << "revoluteJointIndex: " << revoluteJointIndex.size() << std::endl;
         return revoluteJointIndex;
@@ -101,13 +99,12 @@ public:
         int index = 0;
         for (auto i : revoluteJointIndex) { // 遍历单链关节
             auto joint = m_skel->getJoint(i);
-            if (auto revoluteJoint = dynamic_cast<dart::dynamics::RevoluteJoint*>(joint)) { // 如果关节是旋转关节
-                //std::cout << "Sampling for joint: " << joint->getName() << std::endl;
+            // 如果关节是旋转关节
+            if (auto revoluteJoint = dynamic_cast<dart::dynamics::RevoluteJoint*>(joint)) {
                 // 获取关节的上下限
                 double lower = joint->getPositionLowerLimit(0);
                 double upper = joint->getPositionUpperLimit(0);
                 // 创建随机分布
-                //std::uniform_real_distribution<> dis(lower, upper);
                 double randomAngle = generateRandom(lower, upper, 0.01);
                 m_config[index] = randomAngle;
                 index++;
@@ -131,65 +128,81 @@ private:
 //正运动学更新OcTree，每访问1000个点保存一次
 void FK(octomap::OcTree& tree, dart::dynamics::SkeletonPtr skel, double newvisitpointratio, double processRatio, std::vector<int> revoluteJointIndex, std::vector<double>& samplebound, 
         dart::simulation::WorldPtr& world, Eigen::VectorXd& jointTorqueLimits, int& NewvisitPointCount, RandomJointsConfigs& randomJointsConfigs, int samplePointsSize, int timeWithoutUpdate){
-    int totalvisitcount = 0; //总的遍历的点个数
+    int totalvisitcount = 0; //总的遍历的点个数，无论是否有效
     int newVisitCountInBatch = 0; // 用于跟踪每1000次迭代中新访问的点数
-    double constant = 2;
-    //int treeSize = tree.size();
 
+    //计时，start_time为开始时间，interval_time为时间间隔，target_time为目标时间
     auto start_time = std::chrono::steady_clock::now();
     auto interval_time = std::chrono::minutes(timeWithoutUpdate);
     auto target_time = start_time + interval_time;
+
+    // 开始循环
     while(true){
+        // 计算当前时间与目标时间的差值
         auto current_time = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(target_time - current_time);
-        //std::cout << "Elapsed time: " << duration.count() << " ms" << std::endl;
 
+        // 随机采样关节角
         Eigen::VectorXd config = randomJointsConfigs.getConfig(revoluteJointIndex);
         skel->setPositions(config);
+
+        // 获取右手末端执行器的位置。考虑到机器人为对称的，因此右手可达的点即为左手可达的点
         auto rightEndEffector = skel->getBodyNode("rightHandEE");
         Eigen::VectorXd positions(3);
         positions = rightEndEffector->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World()).translation(); // 只获取了右手末端执行器的位置，左手末端执行器的位置没有获取
         octomap::point3d point(positions[0], positions[1], positions[2]);
 
+        // 判断正运动学得到的点是否在空间范围内
         if (point.x() >= samplebound[0] && point.x() <= samplebound[1] && point.y() >= samplebound[2] && point.y() <= samplebound[3] && point.z() >= samplebound[4] && point.z() <= samplebound[5]){ // 判断点是否在有效范围内
             octomap::OcTreeNode* node = tree.search(point);
             Detector Detector(skel, world, jointTorqueLimits);
 
-            bool jointTorqueFlag = Detector.checkJointTorque();
-            if (node == nullptr  && !jointTorqueFlag) {
-                tree.updateNode(point, true);
-                NewvisitPointCount++;
-                newVisitCountInBatch++;
-            }
-            octomap::point3d mirrorpoint = point; // 对称点, 对称点在y轴上对称,右手能到的点,左手也能到
-            mirrorpoint.y() = -point.y();
-            octomap::OcTreeNode* mirrornode = tree.search(mirrorpoint);
-            if (mirrornode == nullptr && !jointTorqueFlag) {
-                tree.updateNode(mirrorpoint, true);
-                NewvisitPointCount++;
+            // 判断之前是否已经添加过该点
+            if (node == nullptr) {
+                // 判断力矩是否超限，如果没有则添加该点
+                bool jointTorqueFlag = Detector.checkJointTorque();
+                if (!jointTorqueFlag){
+                    // 对称点，对称点在y轴上对称,右手能到的点,左手也能到
+                    octomap::point3d mirrorpoint = point; 
+                    mirrorpoint.y() = -point.y();
+                    tree.updateNode(point, true);
+                    tree.updateNode(mirrorpoint, true);
+                    NewvisitPointCount += 2;
+                    newVisitCountInBatch += 2;
+                }
             }
         }
         totalvisitcount++;
+
+        //每循环1000个点，进行以下处理
         if (totalvisitcount%1000 == 0) {
             std::cout << "batchRatio:" << static_cast<double>(newVisitCountInBatch) << "%" << std::endl;
             std::cout << "NewvisitPointCount: " << NewvisitPointCount << " " << static_cast<double>(NewvisitPointCount)/static_cast<double>(samplePointsSize)*100 << "%" << std::endl;
             
-            if (duration.count() == 0){ //经过一个interval_time时间
-                if (newVisitCountInBatch == 0){ // 如果新访问的点数不再增加，则停止循环
+            //经过至少一个interval_time时间
+            if (duration.count() <= 0){ 
+                // 如果新访问的点数不再增加，则停止循环
+                if (newVisitCountInBatch == 0){
                     std::cout << "No more new points" << std::endl;
                     break;
                 }
-                target_time += interval_time; //如果还有新的有效点增加，则再延长一个interval_time时间，到时再判断
-                //newVisitCountInBatch = 0; //重置新访问的点数
+                // 如果还有新的有效点增加，则再延长一个interval_time时间，到时再判断
+                target_time += interval_time;
+                // 重置新访问的点数
+                newVisitCountInBatch = 0;
             }
 
+            // 保存OcTree以及NewvisitPointCount
             CtrlC::saveState();
-            double batchRatio = static_cast<double>(newVisitCountInBatch) / 1000;
+            double batchRatio = static_cast<double>(newVisitCountInBatch) / 1000.0;
+            
+            //每1000个点中新访问的点的比例阈值，如果低于这个数就结束FK。最好设置比较低，接近0。设置一个较低的阈值，可以减少FK的遍历时间。因为遍历的点越多，找到剩下的有效点所需的时间就越长。设置0意味着必须找到所有的有效点才结束
             if (batchRatio < newvisitpointratio) {
                 std::cout << "Batch new visit point ratio is less than newvisitpointratio: " << batchRatio << std::endl;
                 break;
             }
-            newVisitCountInBatch = 0; // 重置批次计数器
+
+            //设置FK遍历的有效点占离散空间的比例阈值，如果低于这个数就结束整个程序
             if (static_cast<double>(NewvisitPointCount)/static_cast<double>(samplePointsSize) >= processRatio){
                 std::cout << "static_cast<double>(NewvisitPointCount)/static_cast<double>(samplePointsSize): " << static_cast<double>(NewvisitPointCount)/static_cast<double>(samplePointsSize) << std::endl;
                 break;
@@ -285,23 +298,25 @@ private:
 };
 
 int main() {
+    //接受ctrl+c中断，保存Octree以及NewvisitPointCount并退出程序
     signal(SIGINT, signalHandler); 
+
     std::string treefilePath = "/home/haitaoxu/workspaceanalysis/M1_full_load_10.bt";
     std::string filename = "/home/haitaoxu/workspaceanalysis/state.txt";
     std::string urdfFile = "/home/haitaoxu/workspaceanalysis/models/M1/M1_full_load.urdf";
 
     //选择是对工作空间进行分析还是可视化
     enum ProgramProcessMode{
-    ProgramProcessMode_Process = 0,
-    ProgramProcessMode_Visualize = 1,
+    ProgramProcessMode_Process = 0, //分析
+    ProgramProcessMode_Visualize = 1, //可视化
     };
     ProgramProcessMode ProgramProcessMode = ProgramProcessMode_Process;
 
-    double resolution = 0.05; //
+    double resolution = 0.05; //分辨率
 
-    double newvisitpointratio = 0; //每1000个点中新访问的点的比例阈值，如果低于这个数就结束FK，开始IK。最好设置比较底，接近0,主要使用FK
-    double processRatio = 0.99; //设置FK的遍历比例阈值，如果低于这个数就结束整个程序
-
+    double newvisitpointratio = 0; //每1000个点中新访问的点的比例阈值，如果低于这个数就结束FK。最好设置比较低，接近0。设置一个较低的阈值，可以减少FK的遍历时间。因为遍历的点越多，找到剩下的有效点所需的时间就越长。设置0意味着必须找到所有的有效点才结束
+    double processRatio = 0.99; //设置FK遍历的有效点占离散空间的比例阈值，如果低于这个数就结束整个程序
+    int timeWithoutUpdate = 10; //分钟数，如果timeWithoutUpdate分钟内没有更新新的有效点则结束程序
     
     CtrlC::restoreState(); // 恢复上次中断时的状态
     octomap::OcTree& tree = CtrlC::tree;
@@ -313,11 +328,14 @@ int main() {
     auto skel = analyzer.m_robot->GetSkeleton();
     world->addSkeleton(skel);
 
-    Eigen::VectorXd jointTorqueLimits = analyzer.m_robot->m_robotConfig.jointTorqueLimits; // 可以手动修改关节力矩限制(修改时要注意joint数！)
+    //获取关节力矩限制
+    Eigen::VectorXd jointTorqueLimits = analyzer.m_robot->m_robotConfig.jointTorqueLimits; 
     
-    double x_min = -0.21, x_max = 2.1;
-    double y_min = -0.3, y_max = -0.25;
-    double z_min = -0.1, z_max = 2.1;
+    //定义要空间范围
+    double x_min = 0.21, x_max = 2.21;
+    double y_min = -0.3, y_max = 0.3;
+    double z_min = 0.4, z_max = 0.5;
+    
     //获取右手末端执行器的位置，从而设置y轴的值
     auto rh = skel->getBodyNode("rightHandEE")->getTransform(dart::dynamics::Frame::World(), dart::dynamics::Frame::World());
     Eigen::Vector3d eePos = rh.translation();
@@ -329,11 +347,9 @@ int main() {
     //对空间进行离散化
     std::vector<Eigen::Vector3d> samplePoints;
     auto SpaceSamplerPtr = std::make_shared<SpaceSampler>();
-    SpaceSamplerPtr->Discretize3DSpace(Eigen::Map<Eigen::Vector6d>(samplebound.data()), resolution, samplePoints); //这样才能得到正确的离散的所有点
+    SpaceSamplerPtr->Discretize3DSpace(Eigen::Map<Eigen::Vector6d>(samplebound.data()), resolution, samplePoints); //这样才能得到正确的离散的所有点。如果不对空间离散化，直接在遍历时对Octree中的点进行 关节角随机采样后经过正运动学后得到的末端执行器的点 搜索并判断是否存在，是否有效等操作，NewvisitPointCount的大小会远远大于pointcloud的大小
     int samplePointsSize = samplePoints.size();
     std::cout << "samplePointsSize: " << samplePointsSize << std::endl;
-
-    //octomap::OcTree& tree = CtrlC::tree;
 
     Eigen::VectorXd config = Eigen::VectorXd::Zero(skel->getNumDofs()); //注意： getNumJoints() 返回的是所有关节的数量，而 getNumDofs() 返回的是自由度的数量
     
@@ -355,9 +371,9 @@ int main() {
             std::cout << "treefilePath not exists" << std::endl;
         }
         std::cout << "FK" << std::endl; // 计算正运动学
-        int timeWithoutUpdate = 10;
         FK(tree, skel, newvisitpointratio, processRatio, revoluteJointIndex, samplebound, world, jointTorqueLimits, NewvisitPointCount, randomJointsConfigs, samplePointsSize, timeWithoutUpdate);
     }
+
     // 如果程序模式为可视化，则进行可视化
     else if (ProgramProcessMode == ProgramProcessMode_Visualize){
         std::cout << "ProgramProcessMode_Visualize" << std::endl;
@@ -370,23 +386,19 @@ int main() {
         }
     }
 
+    // 搭建点云
     auto pointCloudFrame = createPointCloudFrame(); //createPointCloudFrame 函数创建一个 SimpleFrame，用于表示点云在仿真环境中的位置和方向。
     auto pointCloudShape = std::dynamic_pointer_cast<dart::dynamics::PointCloudShape>(pointCloudFrame->getShape());
-
     octomap::Pointcloud pointCloud;
     pointCloud.clear();
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> colors; //这段代码定义了一个名为 colors 的 std::vector 容器，其元素类型为 Eigen::Vector4d，同时使用了 Eigen::aligned_allocator 来管理内存对齐。以下是详细解析。
     for (auto positions:samplePoints) {
         octomap::point3d point(positions[0], positions[1], positions[2]);
         octomap::OcTreeNode* node = tree.search(point);
-        //std::cout << "pcl node->getOccupancy(): " << node->getOccupancy() << std::endl;
         if (node != nullptr) {
             if (node->getOccupancy() >= 0.5) {
-            //std::cout << "it->getValue() == 1" << std::endl;
-            //std::cout << "pcl node->getValue(): " << node->getValue() << std::endl;
             pointCloud.push_back(point.x(), point.y(), point.z());
             colors.push_back({0, 0, 1, 0.5});
-            //std::cout << "pcl pointCloud.size(): " << pointCloud.size() << std::endl;
             }
         }
     }
@@ -397,7 +409,7 @@ int main() {
     pointCloudShape->setVisualSize(resolution);
 
     // 添加工作区间的边界线
-    //SpaceSampler sampler;
+    // SpaceSampler sampler;
     // std::vector<Eigen::Vector3d> boundaryPoints = SpaceSamplerPtr->get2dBoundaryPoints(resolution, samplebound);
 
     // for (auto point : boundaryPoints) {
@@ -436,21 +448,22 @@ int main() {
     float zAxisOffset = 0.9;
     ::osg::Vec3 up_xzView = ::osg::Vec3(0.0, 0.0, 1.0);
 
+    //3D可视化
     viewer->setCameraManipulator(new osgGA::TrackballManipulator());
     viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
     viewer->setCameraManipulator(viewer->getCameraManipulator());
 
+    //2D可视化
     // viewer->getCameraManipulator()->setHomePosition(::osg::Vec3(xAxisOffset, eyeY, zAxisOffset),::osg::Vec3(xAxisOffset, 0.0, zAxisOffset), up_xzView);
     // viewer->setCameraManipulator(viewer->getCameraManipulator());
 
-    //tree.writeBinary(treefilePath);
     std::cout << "save tree.writeBinary success" << std::endl;
     CtrlC::saveState();
 
-
+    // 计算整个程序运行的时间，输出结果为毫秒
     auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time);  // 计算时间差
-    std::cout << "Elapsed time: " << duration.count() << " milliseconds\n";  // 输出结果，单位是毫秒
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time);  
+    std::cout << "Elapsed time: " << duration.count() << " milliseconds\n";
 
     viewer->run();
     

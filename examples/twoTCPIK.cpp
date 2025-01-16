@@ -1,14 +1,13 @@
 #include <dart/dart.hpp>
 #include <dart/utils/urdf/DartLoader.hpp>
 #include <iostream>
-#include <random>
 #include <cmath>
 
 //对2个end effector求逆解
 class TWOTCPIK{
 public:
-    TWOTCPIK(dart::dynamics::SkeletonPtr skel, dart::simulation::WorldPtr& world, std::vector<Eigen::Isometry3d>& TCPTargetPositionsLeftAndRight, 
-    int maxiteration):  m_skel(skel), m_world(world), m_TCPTargetPositionsLeftAndRight(TCPTargetPositionsLeftAndRight), m_maxiteration(maxiteration){}
+    TWOTCPIK(dart::dynamics::SkeletonPtr skel, std::vector<Eigen::Isometry3d>& TCPTargetPositionsLeftAndRight, int maxiteration):  
+    m_skel(skel), m_TCPTargetPositionsLeftAndRight(TCPTargetPositionsLeftAndRight), m_maxiteration(maxiteration){}
 
     //获得关节限位
     std::vector<std::vector<double>> getJointsLimits() {
@@ -60,7 +59,34 @@ public:
         Eigen::MatrixXd J_pseudo_inverse = svd.matrixV() * singularValuesInv * svd.matrixU().transpose();
         return J_pseudo_inverse;
     }
+    
+    //计算四元数误差，输入TCP当前姿态的四元数和目标位姿的四元数，输出Eigen::Vector3d类的四元数误差
+    Eigen::Vector3d computeRotationError(const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2) {
+        Eigen::Quaterniond normalized_q1 = q1.normalized(); // 确保 q1 是单位四元数
+        Eigen::Quaterniond normalized_q2 = q2.normalized(); // 确保 q2 是单位四元数
 
+        Eigen::Quaterniond q_error = normalized_q1.inverse() * normalized_q2;
+
+        // 确保四元数的正方向
+        if (q_error.w() < 0) {
+            q_error.coeffs() *= -1;
+        }
+        
+        // 提取旋转角度
+        double angle = 2 * std::acos(std::clamp(q_error.w(), -1.0, 1.0));
+
+        // 提取旋转轴，注意归一化
+        Eigen::Vector3d axis = q_error.vec();
+        double axisNorm = axis.norm();
+        if (axisNorm > 1e-6) { // 避免除以零
+            axis /= axisNorm;
+        } else {
+            axis.setZero(); // 如果轴长度过小，设置为零向量
+        }
+
+        return angle * axis;
+    }
+    
     //对两只手同时求逆解
     bool getIK_diy(){
         std::cout << "Finding solution using DIY IK..." << std::endl;
@@ -194,33 +220,6 @@ public:
         }
     std::cout << "No solution found using DIY IK within the time limit." << std::endl;
     return false;
-    }
-
-    //计算四元数误差，输入TCP当前姿态的四元数和目标位姿的四元数，输出Eigen::Vector3d类的四元数误差
-    Eigen::Vector3d computeRotationError(const Eigen::Quaterniond& q1, const Eigen::Quaterniond& q2) {
-        Eigen::Quaterniond normalized_q1 = q1.normalized(); // 确保 q1 是单位四元数
-        Eigen::Quaterniond normalized_q2 = q2.normalized(); // 确保 q2 是单位四元数
-
-        Eigen::Quaterniond q_error = normalized_q1.inverse() * normalized_q2;
-
-        // 确保四元数的正方向
-        if (q_error.w() < 0) {
-            q_error.coeffs() *= -1;
-        }
-        
-                // 提取旋转角度
-        double angle = 2 * std::acos(std::clamp(q_error.w(), -1.0, 1.0));
-
-        // 提取旋转轴，注意归一化
-        Eigen::Vector3d axis = q_error.vec();
-        double axisNorm = axis.norm();
-        if (axisNorm > 1e-6) { // 避免除以零
-            axis /= axisNorm;
-        } else {
-            axis.setZero(); // 如果轴长度过小，设置为零向量
-        }
-
-        return angle * axis;
     }
 
     //对左手求逆解
@@ -445,7 +444,6 @@ public:
 
 private:
     dart::dynamics::SkeletonPtr m_skel;
-    dart::simulation::WorldPtr m_world;
     std::vector<Eigen::Isometry3d> m_TCPTargetPositionsLeftAndRight;
     int m_maxiteration;
 };
@@ -463,7 +461,8 @@ public:
 
         std::shared_ptr<dart::dynamics::InverseKinematics> leftHandIkPtr;
         std::shared_ptr<dart::dynamics::InverseKinematics> rightHandIkPtr;
-
+        
+        //设置右手的姿态，是否用全身关节去解以及是否应用关节配置
         rightHandIkPtr = m_skel->getBodyNode("rightHandEE")->getOrCreateIK(); //set a Ik pointer
         Eigen::Isometry3d rhtransform = Eigen::Isometry3d::Identity(); // Identity matrix for no rotation
         rhtransform.translation() = m_eePositions[1].translation();  // Set the translation (position)
@@ -475,16 +474,12 @@ public:
             rightHandIkPtr->useChain();
         }
 
+        //设置左手的姿态，是否用全身关节去解以及是否应用关节配置
         leftHandIkPtr = m_skel->getBodyNode("leftHandEE")->getOrCreateIK();
         Eigen::Isometry3d lhtransform = Eigen::Isometry3d::Identity(); // Identity matrix for no rotation
         lhtransform.linear() = rhtransform.linear() * Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitX()).toRotationMatrix();
         lhtransform.translation() = m_eePositions[0].translation();  // Set the translation (position)
         leftHandIkPtr->getTarget()->setTransform(lhtransform);
-
-        // std::cout << "lhtransform.linear(): " << lhtransform.linear() << std::endl;
-        // std::cout << "lhtransform.translation(): " << lhtransform.translation() << std::endl;
-        // std::cout << "rhtransform.linear(): " << rhtransform.linear() << std::endl;
-        // std::cout << "rhtransform.translation(): " << rhtransform.translation() << std::endl;
 
         if (m_ifUseWholeBody) {
             leftHandIkPtr->useWholeBody();
@@ -516,12 +511,13 @@ int main(){
     dart::utils::DartLoader loader;
     auto skel = loader.parseSkeleton(urdfFile);
 
-    //初始状态零位
+    //初始状态为零位
     skel->setPositions(Eigen::VectorXd(skel->getNumDofs()).setZero());
 
     //获取2个end effector的初始位姿
     Eigen::Isometry3d LHeePose = skel->getBodyNode("leftHandEE")->getWorldTransform();
     Eigen::Isometry3d RHeePose = skel->getBodyNode("rightHandEE")->getWorldTransform();
+
     //设置2个end effector的目标位姿
     LHeePose.translation()[0] += 0.6;
     RHeePose.translation()[0] += 0.6;
@@ -541,17 +537,12 @@ int main(){
     
     //自定义方法求解
     int maxiteration = 1000;
-    TWOTCPIK TWOTCPIK(skel, world, TCPTargetPositionsLeftAndRight, maxiteration);
-    // bool IKdiysolutionLeft = TWOTCPIK.getIK_diy_leftarm();
-    // bool IKdiysolutionRight = TWOTCPIK.getIK_diy_rightarm();
+    TWOTCPIK TWOTCPIK(skel, TCPTargetPositionsLeftAndRight, maxiteration);
     bool IKdiysolutionLeftandRight = TWOTCPIK.getIK_diy();
     
     std::cout << " dart get(IK): " << IKsolution << std::endl;
-    //std::cout << "TCPTargetPositionsLeftAndRight have IK solution for left hand: " << IKdiysolutionLeft << " and right hand:" << IKdiysolutionRight << std::endl;
     std::cout << "TCPTargetPositionsLeftAndRight have IK solution for left hand and right hand: " << IKdiysolutionLeftandRight << std::endl;
     
-    // std::cout << " dart get(IK): " << IKsolution << std::endl;
-    // std::cout << "TCPTargetPositionsLeftAndRight have IK solution: " << IKdiysolution << std::endl;
     
     return 0;
 }
